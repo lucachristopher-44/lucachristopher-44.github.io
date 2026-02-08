@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luca Pozzi | Finance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0e1b2e;
+            --dark-navy: #070d18;
+            --gold: #c0c8d4;
+            --gold-light: #d6dce6;
+            --cream: #f4f6f9;
+            --white: #ffffff;
+            --gray: #6b7280;
+            --light-gray: #e2e6ec;
+            --text: #2d3748;
+            --blue: #94a3b8;
+            --cyan: #cbd5e1;
+            --violet: #8892a4;
+            --silver: #c0c8d4;
+            --silver-bright: #e8ecf2;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: var(--text);
+            background: var(--cream);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--gold);
+            z-index: 10000;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(192, 200, 212, 0.4);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(7, 13, 24, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(192, 200, 212, 0.2);
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        nav.scrolled {
+            background: rgba(7, 13, 24, 0.98);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        nav .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        nav .logo {
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: var(--gold);
+            letter-spacing: 1px;
+            text-decoration: none;
+            transition: transform 0.3s var(--ease-out-back);
+        }
+
+        nav .logo:hover {
+            transform: scale(1.05);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav ul li a {
+            color: var(--cream);
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            position: relative;
+            padding-bottom: 4px;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold);
+            transition: width 0.4s var(--ease-out-expo);
+        }
+
+        nav ul li a:hover::after,
+        nav ul li a.active::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: var(--gold);
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--cream);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Hero */
+        .hero {
+            background: #050c18;
+            color: var(--white);
+            padding: 10rem 2rem 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .hero::before {
+            display: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Staggered hero animations */
+        .hero h1 {
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: 3.5rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            letter-spacing: 3px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: heroReveal 1s var(--ease-out-expo) 0.3s forwards;
+        }
+
+        .hero .divider {
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.2), rgba(192,200,212,0.8), rgba(255,255,255,0.2));
+            margin: 1.5rem auto;
+            animation: dividerExpand 0.8s var(--ease-out-expo) 0.7s forwards;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: #b0bec5;
+            max-width: 520px;
+            margin: 0 auto 2rem;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: heroReveal 1s var(--ease-out-expo) 1s forwards;
+        }
+
+        .hero .cta-btn {
+            display: inline-block;
+            padding: 0.8rem 2.2rem;
+            background: transparent;
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            text-decoration: none;
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: all 0.4s var(--ease-out-expo);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: heroReveal 1s var(--ease-out-expo) 1.3s forwards;
+        }
+
+        .hero .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .hero .cta-btn:hover::before {
+            left: 100%;
+        }
+
+        .hero .cta-btn:hover {
+            background: var(--gold);
+            color: var(--dark-navy);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.25), 0 0 40px rgba(192, 200, 212, 0.15);
+            transform: translateY(-2px);
+        }
+
+        @keyframes heroReveal {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes dividerExpand {
+            to {
+                width: 60px;
+            }
+        }
+
+        /* Sections */
+        section {
+            padding: 5rem 2rem;
+        }
+
+        .section-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Scroll reveal base styles */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+        }
+
+        .reveal.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+        }
+
+        .reveal-left.in-view {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+        }
+
+        .reveal-right.in-view {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.92);
+            transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+        }
+
+        .reveal-scale.in-view {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .section-line {
+            width: 0;
+            height: 3px;
+            background: var(--gold);
+            margin-bottom: 2.5rem;
+            transition: width 0.8s var(--ease-out-expo) 0.2s;
+        }
+
+        .in-view .section-line,
+        .section-line.in-view {
+            width: 40px;
+        }
+
+        /* About */
+        .about-top {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 2.5rem;
+            align-items: start;
+            margin-bottom: 2.5rem;
+        }
+
+        .headshot {
+            width: 200px;
+            height: 250px;
+            object-fit: cover;
+            object-position: center top;
+            transition: transform 0.4s var(--ease-out-expo);
+        }
+
+        .headshot:hover {
+            transform: scale(1.02);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .about-text p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .about-details {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1.5rem 2rem;
+            border-top: 2px solid var(--gold);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            align-items: center;
+        }
+
+        .about-details h3 {
+            font-size: 0.75rem;
+            color: var(--gray);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 0.8rem;
+        }
+
+        .detail-item {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.4rem 1rem;
+            border-right: 1px solid var(--light-gray);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .detail-item:first-of-type {
+            padding-left: 0;
+        }
+
+        .detail-item:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        .detail-label {
+            color: var(--gray);
+        }
+
+        .detail-value {
+            color: var(--navy);
+            font-weight: 600;
+        }
+
+        /* Resume */
+        #resume {
+            background: var(--white);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--light-gray);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 0.4rem;
+            width: 10px;
+            height: 10px;
+            background: var(--gold);
+            border-radius: 50%;
+            transition: transform 0.3s var(--ease-out-back), box-shadow 0.3s;
+        }
+
+        .timeline-item:hover::before {
+            transform: scale(1.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+
+        .timeline-date {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.8rem;
+            color: var(--gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-title {
+            font-size: 1.15rem;
+            color: var(--navy);
+            margin-bottom: 0.2rem;
+        }
+
+        .timeline-org {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-desc {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .resume-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .resume-section h3 {
+            font-size: 1.2rem;
+            color: var(--navy);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gold);
+            display: inline-block;
+        }
+
+        /* Skills */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .skill-item {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.9rem;
+            padding: 0.6rem 1rem;
+            background: var(--cream);
+            color: var(--navy);
+            border-left: 3px solid var(--cyan);
+            position: relative;
+            overflow: hidden;
+            transition: color 0.4s, transform 0.3s var(--ease-out-back);
+            z-index: 1;
+        }
+
+        .skill-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(192, 200, 212, 0.12), rgba(148, 163, 184, 0.05));
+            transition: width 0.5s var(--ease-out-expo);
+            z-index: -1;
+        }
+
+        .skill-item:hover::before {
+            width: 100%;
+        }
+
+        .skill-item:hover {
+            transform: translateX(4px);
+        }
+
+        .skill-item.has-cert {
+            cursor: pointer;
+        }
+
+        .skill-item.has-cert::after {
+            content: '↗';
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            color: var(--gray);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s var(--ease-out-back);
+        }
+
+        .skill-item.has-cert:hover::after {
+            opacity: 1;
+            transform: translateY(-50%) translateX(2px);
+        }
+
+        /* Certification PDF Modal */
+        .cert-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 13, 24, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .cert-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .cert-modal-inner {
+            width: 90%;
+            max-width: 800px;
+            height: 85vh;
+            background: var(--white);
+            position: relative;
+            animation: modalSlideIn 0.4s var(--ease-out-expo);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cert-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .cert-modal-header h3 {
+            font-size: 1rem;
+            color: var(--navy);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 600;
+        }
+
+        .cert-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .cert-modal-close:hover {
+            color: var(--navy);
+            transform: scale(1.15);
+        }
+
+        .cert-modal iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .cert-modal-inner {
+                width: 95%;
+                height: 80vh;
+            }
+        }
+
+        /* Stat counters */
+        .stat-value {
+            display: inline-block;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        /* Blog */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .blog-card {
+            background: var(--white);
+            border: 1px solid var(--light-gray);
+            transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo), border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blog-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s var(--ease-out-expo);
+        }
+
+        .blog-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .blog-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            border-color: rgba(192, 200, 212, 0.4);
+        }
+
+        .blog-card-header {
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .blog-tag {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.7rem;
+            color: var(--gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .blog-card h3 {
+            font-size: 1.1rem;
+            color: var(--navy);
+            margin: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .blog-card-body {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .blog-card p {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.88rem;
+            color: var(--gray);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .blog-date {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .read-more {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.85rem;
+            color: var(--gold);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            transition: color 0.3s, letter-spacing 0.3s;
+        }
+
+        .read-more:hover {
+            color: var(--navy);
+            letter-spacing: 1.5px;
+        }
+
+        /* Contact */
+        #contact {
+            background: var(--white);
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .contact-info p {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.95rem;
+            color: var(--text);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.9rem;
+            transition: transform 0.3s var(--ease-out-expo);
+        }
+
+        .contact-item:hover {
+            transform: translateX(6px);
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-weight: 700;
+            flex-shrink: 0;
+            transition: background 0.3s, color 0.3s, transform 0.3s var(--ease-out-back);
+        }
+
+        .contact-item:hover .contact-icon {
+            color: var(--white);
+            transform: scale(1.1);
+        }
+
+        .contact-item:hover .contact-icon { background: var(--navy); }
+
+        .contact-item a {
+            color: var(--navy);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .contact-item a:hover {
+            color: var(--gold);
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            padding: 0.9rem 1rem;
+            border: 1px solid var(--light-gray);
+            background: var(--cream);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.9rem;
+            color: var(--text);
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(192, 200, 212, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .contact-form textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .contact-form button {
+            padding: 0.9rem 2rem;
+            background: var(--navy);
+            color: var(--gold);
+            border: none;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.4s var(--ease-out-expo);
+            align-self: flex-start;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-form button::after {
+            content: ' →';
+            opacity: 0;
+            transform: translateX(-8px);
+            display: inline-block;
+            transition: opacity 0.3s, transform 0.3s var(--ease-out-expo);
+        }
+
+        .contact-form button:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .contact-form button:hover {
+            background: var(--dark-navy);
+            box-shadow: 0 4px 20px rgba(15, 25, 35, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-navy);
+            color: #6b7f94;
+            text-align: center;
+            padding: 2.5rem 2rem;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.85rem;
+            border-top: 2px solid var(--gold);
+        }
+
+        footer .social-links {
+            margin-bottom: 1rem;
+        }
+
+        footer .social-links a {
+            color: var(--cream);
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            transition: color 0.3s, transform 0.3s var(--ease-out-back);
+            display: inline-block;
+        }
+
+        footer .social-links a:hover {
+            color: var(--white);
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        /* Article Modal */
+        .article-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 13, 24, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .article-modal.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .article-modal-inner {
+            max-width: 720px;
+            margin: 4rem auto;
+            background: var(--white);
+            padding: 3rem;
+            position: relative;
+            animation: modalSlideIn 0.4s var(--ease-out-expo);
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .article-modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .article-modal-close:hover {
+            color: var(--navy);
+            transform: scale(1.15);
+        }
+
+        .article-modal .blog-tag {
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .article-modal h2 {
+            font-size: 1.8rem;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .article-modal .article-date {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        .article-modal .article-body p {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.9;
+            margin-bottom: 1.2rem;
+        }
+
+        .article-modal .article-body h3 {
+            font-size: 1.15rem;
+            color: var(--navy);
+            margin: 2rem 0 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .article-modal-inner {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+            .article-modal h2 {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+            .reveal, .reveal-left, .reveal-right, .reveal-scale {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .hero h1, .hero p, .hero .cta-btn {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .hero .divider {
+                width: 60px !important;
+            }
+            .section-line {
+                width: 40px !important;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                background: rgba(7, 13, 24, 0.98);
+                backdrop-filter: blur(12px);
+                flex-direction: column;
+                padding: 1rem 2rem;
+                gap: 1rem;
+                border-bottom: 2px solid var(--gold);
+            }
+
+            nav ul.active {
+                display: flex;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.4rem;
+            }
+
+            .hero {
+                padding: 8rem 2rem 4rem;
+                min-height: auto;
+            }
+
+            .about-top {
+                grid-template-columns: 1fr;
+                justify-items: center;
+                text-align: center;
+            }
+
+            .headshot {
+                width: 160px;
+                height: 200px;
+            }
+
+            .about-content,
+            .resume-sections,
+            .blog-grid,
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 3.5rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Navigation -->
+    <nav id="mainNav">
+        <div class="nav-inner">
+            <a href="#" class="logo">LP</a>
+            <button class="mobile-toggle" onclick="document.querySelector('nav ul').classList.toggle('active')" aria-label="Toggle menu">&#9776;</button>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#resume">Resume</a></li>
+                <li><a href="#blog">Blog</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+        <canvas id="particleCanvas"></canvas>
+        <div class="hero-content">
+            <h1>LUCA POZZI</h1>
+            <div class="divider"></div>
+            <p>SDR &amp; GTM-focused finance/tech student with top-ranked retail sales performance and experience driving outbound growth, client acquisition, and revenue expansion.</p>
+            <a href="#contact" class="cta-btn">LET'S CONNECT</a>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about">
+        <div class="section-inner">
+            <div class="reveal-left">
+                <h2 class="section-title">About</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="about-top reveal">
+                <img src="Headshot.jpg?v=2" alt="Luca Pozzi" class="headshot">
+                <div class="about-text">
+                    <p>I'm a finance and fintech student at Fordham University's Gabelli School of Business with a track record of top-ranked sales performance and hands-on experience in outbound growth, client acquisition, and revenue expansion.</p>
+                    <p>My experience spans sales at Equinox and Pietra Communications, customer relations at the United States-Mexico Chamber of Commerce, and hospitality at Aquarelle. I'm also an active board member of the Fintech/VC Club, where I analyze fintech and VC-backed startups.</p>
+                    <p>I'm passionate about old movies and windsurfing, and I'm fluent in English and Italian with conversational Spanish and French.</p>
+                </div>
+            </div>
+            <div class="reveal-right">
+                <div class="about-details">
+                    <h3>Quick Facts</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value">Luca Pozzi</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">School</span>
+                        <span class="detail-value">Fordham Gabelli</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Major</span>
+                        <span class="detail-value">Finance &amp; Fintech</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">GPA</span>
+                        <span class="detail-value"><span class="stat-value" data-target="3.9" data-decimals="1">0</span></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Languages</span>
+                        <span class="detail-value">EN, IT, ES, FR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resume -->
+    <section id="resume">
+        <div class="section-inner">
+            <div class="reveal-left">
+                <h2 class="section-title">Resume</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="resume-sections">
+                <div class="resume-section reveal">
+                    <h3>Education</h3>
+                    <div class="timeline">
+                        <div class="timeline-item reveal">
+                            <div class="timeline-date">Present</div>
+                            <div class="timeline-title">B.S. Finance, Fintech Concentration</div>
+                            <div class="timeline-org">Fordham University, Gabelli School of Business</div>
+                            <div class="timeline-desc">GPA: <span class="stat-value" data-target="3.9" data-decimals="1">0</span> &bull; Dean's List 2024, 2025, 2026. Relevant coursework: Financial Modeling, Fintech, Venture Capital, Marketing, Data Systems.</div>
+                        </div>
+                        <div class="timeline-item reveal">
+                            <div class="timeline-date">Previously</div>
+                            <div class="timeline-title">International Baccalaureate</div>
+                            <div class="timeline-org">The American High School of Milan, Italy</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="resume-section reveal">
+                    <h3>Sales Experience</h3>
+                    <div class="timeline">
+                        <div class="timeline-item reveal">
+                            <div class="timeline-date">June 2023 &mdash; June 2024</div>
+                            <div class="timeline-title">Sales Associate</div>
+                            <div class="timeline-org">Equinox &mdash; New York, NY</div>
+                            <div class="timeline-desc">Generated <span class="stat-value" data-target="60" data-prefix="$" data-suffix="K+">0</span> in sales, consistently ranking as top salesperson in the district. Cold-called and churned prospective members, designed targeted in-class promotions, and created a direct-order service opening a new revenue channel.</div>
+                        </div>
+                        <div class="timeline-item reveal">
+                            <div class="timeline-date">Sept. 2023 &mdash; Sept. 2025</div>
+                            <div class="timeline-title">Sales Associate</div>
+                            <div class="timeline-org">Pietra Communications &mdash; New York, NY</div>
+                            <div class="timeline-desc">Built and managed a prospect database that increased new client acquisition by <span class="stat-value" data-target="27" data-suffix="%">0</span>. Created an automated personalization tool for tailored emails and pitched and scoped <span class="stat-value" data-target="90" data-prefix="$" data-suffix="K+">0</span> targeted campaigns to prospects.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem;">
+                <div class="resume-sections">
+                    <div class="resume-section reveal">
+                        <h3>Other Experience</h3>
+                        <div class="timeline">
+                            <div class="timeline-item reveal">
+                                <div class="timeline-date">July 2023 &mdash; Sept. 2023</div>
+                                <div class="timeline-title">Customer Relations</div>
+                                <div class="timeline-org">United States-Mexico Chamber of Commerce &mdash; New York, NY</div>
+                                <div class="timeline-desc">Improved NPS results <span class="stat-value" data-target="22" data-suffix="%">0</span> compared to previous quarters. Engaged senior corporate attendees to surface partnership and sponsorship opportunities, and produced post-event follow-ups generating dozens of qualified leads.</div>
+                            </div>
+                            <div class="timeline-item reveal">
+                                <div class="timeline-date">June 2025 &mdash; Sept. 2025</div>
+                                <div class="timeline-title">Bartender</div>
+                                <div class="timeline-org">Aquarelle &mdash; New York, NY</div>
+                                <div class="timeline-desc">Served <span class="stat-value" data-target="200" data-suffix="+">0</span> nightly guests in a high-volume setting. Maintained the highest average ticket cost among servers by upselling menu offerings, and collaborated with hosts and promoters to plan private events for <span class="stat-value" data-target="50" data-suffix="+">0</span> guests.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="resume-section reveal">
+                        <h3>Extracurricular</h3>
+                        <div class="timeline">
+                            <div class="timeline-item reveal">
+                                <div class="timeline-date">Sept. 2023 &mdash; Present</div>
+                                <div class="timeline-title">Board Member</div>
+                                <div class="timeline-org">Fintech/VC Club &mdash; New York, NY</div>
+                                <div class="timeline-desc">Wrote analyses of fintech and VC-backed startups for weekly club meetings and the markets newsletter. Organized the One Shared Truth conference, moderating fireside chats and contacting guest speakers.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem;" class="reveal">
+                <h3 style="font-size: 1.2rem; color: var(--navy); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--gold); display: inline-block;">Skills &amp; Certifications</h3>
+                <div class="skills-grid">
+                    <div class="skill-item reveal">Python (Automation, Data Scraping, APIs)</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('FP&amp;A Course Certificate - NASBA.pdf', 'Excel &amp; FP&amp;A Certificate')">Excel (Macros, Pivot Tables, KPI Dashboards)</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('Bloomberg Market Concepts.pdf', 'Bloomberg Market Concepts')">Bloomberg Market Concepts</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('FINRA SIE.pdf', 'FINRA SIE Certification')">Finra SIE Certification</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('Envestnet Certification.pdf', 'Envestnet Certification')">Envestnet Certification</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('Intermediate Python 2.pdf', 'Intermediate Python Certificate')">Intermediate Python Certificate</div>
+                    <div class="skill-item reveal">Financial Modeling</div>
+                    <div class="skill-item reveal">Venture Capital &amp; Fintech</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog -->
+    <section id="blog">
+        <div class="section-inner">
+            <div class="reveal-left">
+                <h2 class="section-title">Blog</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="blog-grid">
+                <div class="blog-card reveal-scale" onclick="openArticle('fed-chair')" style="cursor:pointer;">
+                    <div class="blog-card-header">
+                        <span class="blog-tag">Macro</span>
+                        <h3>What the Next Fed Chair Means for Gold, Silver, and Crypto</h3>
+                    </div>
+                    <div class="blog-card-body">
+                        <p>The Fed chair sets the tone for monetary policy, and that tone ripples directly into hard assets and digital currencies. Here's what to watch.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="blog-date">February 2026</span>
+                            <span class="read-more">Read More &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="blog-card reveal-scale" onclick="openArticle('ai-finance')" style="cursor:pointer;">
+                    <div class="blog-card-header">
+                        <span class="blog-tag">Fintech</span>
+                        <h3>How AI Is Transforming Financial Analysis</h3>
+                    </div>
+                    <div class="blog-card-body">
+                        <p>A look at how machine learning and AI tools are changing the way analysts approach equity research, risk management, and portfolio optimization.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="blog-date">January 2026</span>
+                            <span class="read-more">Read More &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="blog-card reveal-scale" onclick="openArticle('private-credit')" style="cursor:pointer;">
+                    <div class="blog-card-header">
+                        <span class="blog-tag">Credit</span>
+                        <h3>Will Private Credit Go Public?</h3>
+                    </div>
+                    <div class="blog-card-body">
+                        <p>Private credit has ballooned into a $1.7 trillion market. As retail access expands and regulators circle, the asset class faces an identity crisis.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="blog-date">December 2025</span>
+                            <span class="read-more">Read More &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="blog-card reveal-scale" onclick="openArticle('saas')" style="cursor:pointer;">
+                    <div class="blog-card-header">
+                        <span class="blog-tag">Tech</span>
+                        <h3>Why SaaS Isn't Dead Yet</h3>
+                    </div>
+                    <div class="blog-card-body">
+                        <p>Everyone loves declaring SaaS dead. But recurring revenue, sticky products, and AI integration tell a different story for the business model that built modern tech.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="blog-date">November 2025</span>
+                            <span class="read-more">Read More &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact">
+        <div class="section-inner">
+            <div class="reveal-left">
+                <h2 class="section-title">Contact</h2>
+                <div class="section-line"></div>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info reveal">
+                    <p>I'm always open to connecting with professionals, fellow students, and anyone interested in finance and technology. Whether it's about opportunities, collaboration, or just a conversation, feel free to reach out.</p>
+                    <div class="contact-item">
+                        <div class="contact-icon">@</div>
+                        <a href="mailto:luca_christopher@icloud.com">luca_christopher@icloud.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">in</div>
+                        <a href="https://www.linkedin.com/in/4-lucapozzi/" target="_blank">LinkedIn Profile</a>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                        <span>New York, NY</span>
+                    </div>
+                </div>
+                <form class="contact-form reveal-right" id="contactForm" action="https://formspree.io/f/mkovgwbw" method="POST">
+                    <input type="text" name="name" placeholder="Your Name" required>
+                    <input type="email" name="email" placeholder="Your Email" required>
+                    <input type="text" name="subject" placeholder="Subject">
+                    <textarea name="message" placeholder="Your Message" required></textarea>
+                    <input type="hidden" name="_subject" value="New message from your website">
+                    <button type="submit" id="contactSubmit">Send Message</button>
+                    <p class="form-status" id="formStatus" style="display:none; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 0.85rem; margin-top: 0.5rem;"></p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Article Modals -->
+    <div class="article-modal" id="article-fed-chair">
+        <div class="article-modal-inner">
+            <button class="article-modal-close" onclick="closeArticle()">&times;</button>
+            <span class="blog-tag">Macro</span>
+            <h2>What the Next Fed Chair Means for Gold, Silver, and Crypto</h2>
+            <span class="article-date">February 2026</span>
+            <div class="article-body">
+                <p>Every four years, markets hold their breath over the same question: who will lead the Federal Reserve? It's not just a policy appointment. The person sitting in that chair shapes the cost of capital across the global economy, and for alternative assets like precious metals and crypto, the implications are enormous.</p>
+
+                <h3>Why the Chair Matters More Than You Think</h3>
+                <p>The Fed chair doesn't just set interest rates. They set the narrative. A hawkish chair signals tighter money, higher real yields, and a stronger dollar. A dovish one implies the opposite. And it's that narrative, often more than the actual policy, that moves markets in the short term.</p>
+                <p>Gold and silver are classically inverse to real yields. When the Fed holds rates high and inflation cools, the opportunity cost of holding non-yielding metals goes up. But when markets sense a pivot or a softer policy regime, metals rally hard. We saw this in late 2023 and again in early 2025, both times when forward guidance shifted before rates actually moved.</p>
+
+                <h3>The Precious Metals Angle</h3>
+                <p>Gold has historically outperformed during periods of policy uncertainty. The transition between Fed chairs is exactly that kind of moment. Investors don't know what the playbook will be, so they hedge. Central bank demand, already at multi-decade highs, tends to accelerate during leadership transitions as sovereign buyers front-run potential regime shifts.</p>
+                <p>Silver adds a layer of complexity. It's both a monetary metal and an industrial one. A chair who prioritizes full employment and tolerates slightly higher inflation could be a dual tailwind: looser money for the monetary bid, stronger manufacturing for the industrial bid. If the next chair leans into supporting the energy transition or domestic infrastructure, silver's supply-demand story gets even tighter.</p>
+
+                <h3>Crypto's Sensitivity to the Fed</h3>
+                <p>Bitcoin was born as a response to central bank excess, but it trades like a risk asset. Correlation with the Nasdaq sits around 0.6 over the past three years. When the Fed tightens, crypto sells off. When liquidity expands, it rips. The chair's stance on quantitative tightening, balance sheet runoff, and bank reserve requirements matters as much for Bitcoin as it does for equities.</p>
+                <p>There's also the regulatory dimension. A chair who views digital assets as systemic risks will push for stricter bank capital rules around crypto exposure. One who sees them as innovation will leave more room for institutional adoption. The tone from the top of the Fed filters directly into how aggressively the OCC, FDIC, and SEC coordinate on crypto policy.</p>
+
+                <h3>What to Watch</h3>
+                <p>The next appointment cycle will likely hinge on a few questions. Does the incoming chair view the neutral rate as structurally higher than pre-pandemic levels? Are they willing to tolerate above-target inflation for the sake of employment? How do they think about financial stability in the context of a $1.7 trillion private credit market and $3 trillion in crypto market cap?</p>
+                <p>For investors in metals and digital assets, the answers to these questions aren't academic. They're the difference between a multi-year bull run and a prolonged grind. Pay attention to the confirmation hearings. The real alpha is in the policy signals before the first rate decision.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="article-modal" id="article-ai-finance">
+        <div class="article-modal-inner">
+            <button class="article-modal-close" onclick="closeArticle()">&times;</button>
+            <span class="blog-tag">Fintech</span>
+            <h2>How AI Is Transforming Financial Analysis</h2>
+            <span class="article-date">January 2026</span>
+            <div class="article-body">
+                <p>Walk into any trading floor or asset management office today and you'll find the same thing: analysts using AI tools that didn't exist two years ago. The shift isn't coming. It's here, and it's already changing who gets hired, what skills matter, and how investment decisions get made.</p>
+
+                <h3>From Spreadsheets to Language Models</h3>
+                <p>For decades, financial analysis meant building Excel models, reading 10-Ks, and making educated guesses about forward earnings. The process was manual, slow, and heavily dependent on an analyst's ability to synthesize information from dozens of sources. A good analyst could cover maybe 20 stocks deeply. AI doesn't replace that judgment, but it compresses the grunt work dramatically.</p>
+                <p>Large language models can now parse an entire earnings transcript in seconds, flag deviations from prior guidance, cross-reference management commentary against supply chain data, and surface sentiment shifts that a human reader might miss on the third read-through. The analyst's role is shifting from information gatherer to decision maker.</p>
+
+                <h3>Equity Research Gets Faster</h3>
+                <p>Sell-side research has historically operated on a publish-or-perish model. Speed to a note after earnings mattered almost as much as the quality of the analysis. AI is collapsing that timeline. Some shops are using generative models to draft first-pass research notes within minutes of an earnings release, which analysts then refine and add conviction to.</p>
+                <p>The implication is significant. If every desk has access to the same AI-generated baseline, the edge shifts from speed of information processing to quality of insight. The analysts who thrive will be the ones who can ask better questions, not the ones who can read faster.</p>
+
+                <h3>Risk Management and Portfolio Construction</h3>
+                <p>On the buy side, AI is reshaping how portfolios get built. Traditional mean-variance optimization relied on historical correlations that broke down exactly when you needed them most. Newer approaches use machine learning to model regime shifts, tail risks, and non-linear factor exposures that classical models couldn't capture.</p>
+                <p>Credit analysis is another area seeing rapid adoption. Parsing loan covenants across a portfolio of hundreds of private credit deals used to require an army of associates. NLP models can now flag covenant breaches, extract key terms, and compare deal structures across vintages at a fraction of the time and cost.</p>
+
+                <h3>What This Means for Students Entering Finance</h3>
+                <p>The skillset for entry-level finance roles is evolving fast. Knowing how to build a DCF is table stakes. What's increasingly valuable is the ability to work with AI tools: knowing how to prompt a model effectively, how to validate its outputs against first principles, and how to integrate AI-generated analysis into a coherent investment thesis.</p>
+                <p>Python fluency is becoming as important as accounting fluency. Not because every analyst needs to build models from scratch, but because understanding what's happening under the hood is the difference between using AI as a tool and being replaced by it. The best junior analysts I've seen treat AI as a research partner, not an oracle.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="article-modal" id="article-private-credit">
+        <div class="article-modal-inner">
+            <button class="article-modal-close" onclick="closeArticle()">&times;</button>
+            <span class="blog-tag">Credit</span>
+            <h2>Will Private Credit Go Public?</h2>
+            <span class="article-date">December 2025</span>
+            <div class="article-body">
+                <p>Private credit has been the quiet giant of post-GFC finance. While public markets grabbed headlines, an entire parallel lending system grew from under $500 billion in 2015 to over $1.7 trillion today. Now the question isn't whether it will keep growing, but whether it can stay private.</p>
+
+                <h3>How We Got Here</h3>
+                <p>After 2008, banks pulled back from lending to mid-market companies. Regulatory capital requirements under Basel III and Dodd-Frank made it expensive for traditional lenders to hold risky credit on their balance sheets. Private credit funds filled the gap, offering direct loans to companies that couldn't easily access public bond markets or syndicated loans.</p>
+                <p>The pitch to investors was compelling: higher yields than investment-grade bonds, lower volatility than public high-yield (partly because these assets don't mark to market daily), and genuine diversification away from public equity risk. Pension funds, endowments, and sovereign wealth funds piled in.</p>
+
+                <h3>The Retailification Problem</h3>
+                <p>The issue now is that institutional demand has been so strong that returns are compressing. Spreads on direct lending deals have tightened from 600+ basis points over SOFR to sometimes under 500. Fund managers need new capital sources to maintain AUM growth, and the obvious answer is retail.</p>
+                <p>We're already seeing it. Interval funds, BDCs, and semi-liquid structures are packaging private credit for high-net-worth and even mass-affluent investors. Apollo, Blackstone, and Ares have all launched or expanded retail-accessible credit vehicles. The question is whether these structures can handle the fundamental mismatch between illiquid assets and investors who expect some degree of liquidity.</p>
+
+                <h3>Regulatory Pressure</h3>
+                <p>Regulators are paying attention. The SEC has flagged concerns about valuation practices in private credit, specifically the risk that managers are slow to mark down troubled loans. The Basel Committee has raised questions about bank exposure to private credit through fund finance facilities. And the Financial Stability Board has started including private credit in its systemic risk monitoring.</p>
+                <p>None of this means a crackdown is imminent, but the regulatory direction is clear: more transparency, more standardized reporting, and eventually more oversight. Each step toward transparency makes private credit look a little more like public credit. That's the paradox.</p>
+
+                <h3>Can It Stay Private?</h3>
+                <p>The bull case for private credit has always rested on two pillars: the illiquidity premium and information asymmetry. Lenders who can do deep diligence on a middle-market company and hold the loan to maturity should earn a premium over public market investors who can't or won't.</p>
+                <p>But as the market grows, those edges erode. More competition means tighter spreads. More retail money means more liquidity provisions. More regulatory scrutiny means more disclosure. At some point, private credit starts to look a lot like a slower, more expensive version of public high-yield with a different label.</p>
+                <p>My view is that the best managers will continue to earn their fees through genuine sourcing and underwriting skill. But the asset class as a whole is on a trajectory toward convergence with public markets. The label might stay private. The reality will be increasingly public.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="article-modal" id="article-saas">
+        <div class="article-modal-inner">
+            <button class="article-modal-close" onclick="closeArticle()">&times;</button>
+            <span class="blog-tag">Tech</span>
+            <h2>Why SaaS Isn't Dead Yet</h2>
+            <span class="article-date">November 2025</span>
+            <div class="article-body">
+                <p>If you've scrolled through finance Twitter or sat through a VC panel recently, you've heard the take: SaaS is dead. AI is going to unbundle every software tool into a prompt. Seat-based pricing is over. The recurring revenue model that built a generation of tech companies is supposedly finished. I think that's wrong, and here's why.</p>
+
+                <h3>The Revenue Model Still Works</h3>
+                <p>SaaS companies trade at premium multiples for a reason. Recurring revenue is predictable. Net revenue retention above 120% means your existing customers are spending more every year without you acquiring a single new one. Gross margins north of 75% mean every incremental dollar of revenue falls almost entirely to the bottom line after you've built the product.</p>
+                <p>Compare that to the unit economics of most AI-native companies right now. Inference costs are real. GPU compute is expensive. And most AI products are still struggling with the same customer acquisition challenges that SaaS companies solved years ago. The models might be new, but the go-to-market playbook is the same.</p>
+
+                <h3>Switching Costs Are Real</h3>
+                <p>The strongest argument for SaaS durability is the one nobody talks about because it's boring: switching costs. An enterprise running its CRM on Salesforce, its ERP on NetSuite, and its comms on Slack isn't going to rip that out because an AI chatbot can draft emails. These tools are embedded in workflows, training programs, compliance frameworks, and integration architectures that took years to build.</p>
+                <p>The switching cost isn't just financial. It's organizational. Every migration is a project with risk, downtime, and retraining. CTOs know this, which is why churn rates at the best enterprise SaaS companies sit below 5% annually. That's not a model that's dying.</p>
+
+                <h3>AI Makes SaaS Better, Not Obsolete</h3>
+                <p>The smarter way to think about AI and SaaS isn't replacement. It's enhancement. The SaaS companies that are thriving right now are the ones embedding AI into their existing products. Notion added AI summarization. HubSpot added AI-generated email sequences. Even Salesforce rolled out Einstein GPT. In each case, AI became a feature that increased willingness to pay, not a competitor that made the product irrelevant.</p>
+                <p>The companies most at risk aren't SaaS businesses broadly. They're the thin-wrapper tools that did one simple thing and charged a monthly fee for it. PDF converters, basic scheduling tools, simple form builders. Those are getting commoditized by AI. But the platforms with deep data moats, complex workflows, and enterprise-grade compliance? They're using AI to widen the gap.</p>
+
+                <h3>Valuation Resets Aren't Death</h3>
+                <p>Part of the "SaaS is dead" narrative comes from the valuation correction of 2022-2023. Revenue multiples compressed from 20x+ to 6-8x for many public SaaS names. That was painful for investors who bought at the top. But it wasn't a structural failure of the business model. It was a return to rational pricing after a period of excess.</p>
+                <p>At current valuations, many SaaS companies are actually attractive. They generate real free cash flow, have durable competitive positions, and are growing 15-25% annually. If anything, the reset made the sector healthier by flushing out the companies that were burning cash to juice growth metrics without building real products.</p>
+                <p>SaaS isn't dead. It's just not overhyped anymore. And for investors who care about fundamentals over narratives, that's exactly when you want to be paying attention.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certification PDF Modal -->
+    <div class="cert-modal" id="certModal">
+        <div class="cert-modal-inner">
+            <div class="cert-modal-header">
+                <h3 id="certModalTitle">Certificate</h3>
+                <button class="cert-modal-close" onclick="closeCert()">&times;</button>
+            </div>
+            <iframe id="certModalFrame" src=""></iframe>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/4-lucapozzi/" target="_blank">LinkedIn</a>
+            <a href="Luca Pozzi Resume.pdf" download>Resume ↓</a>
+        </div>
+        <p>&copy; 2026 Luca Pozzi. All rights reserved.</p>
+    </footer>
+
+    <script>
+    // === Galaxy Hero Background ===
+    (function() {
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, cx, cy;
+        let mouse = { x: null, y: null };
+        let time = 0;
+        let stars = [];
+        let dustParticles = [];
+        let streaks = [];
+        let bgStars = [];
+
+        const palette = [
+            { r: 255, g: 255, b: 255 },
+            { r: 210, g: 218, b: 235 },
+            { r: 170, g: 185, b: 210 },
+            { r: 140, g: 160, b: 200 },
+            { r: 230, g: 235, b: 245 },
+        ];
+
+        function randomColor() {
+            return palette[Math.floor(Math.random() * palette.length)];
+        }
+
+        // === Galaxy parameters ===
+        const ARMS = 3;
+        const ARM_SPREAD = 0.6;
+        const ROTATION_SPEED = 0.015;
+        const GALAXY_TILT = 0.55;
+
+        function resize() {
+            const hero = document.getElementById('hero');
+            w = canvas.width = hero.offsetWidth;
+            h = canvas.height = hero.offsetHeight;
+            cx = w * 0.5;
+            cy = h * 0.48;
+            createStars();
+            createDust();
+            createBgStars();
+        }
+
+        // === Background static stars (tiny, twinkling) ===
+        function createBgStars() {
+            bgStars = [];
+            const count = Math.floor((w * h) / 400);
+            for (let i = 0; i < count; i++) {
+                bgStars.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    r: Math.random() * 1.2 + 0.15,
+                    alpha: Math.random() * 0.6 + 0.08,
+                    twinkleSpeed: Math.random() * 0.03 + 0.005,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    color: randomColor()
+                });
+            }
+        }
+
+        function drawBgStars() {
+            for (const s of bgStars) {
+                s.twinklePhase += s.twinkleSpeed;
+                const a = s.alpha * (0.5 + 0.5 * Math.sin(s.twinklePhase));
+                const c = s.color;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${a})`;
+                ctx.fill();
+            }
+        }
+
+        // === Spiral galaxy stars ===
+        function createStars() {
+            stars = [];
+            const maxRadius = Math.max(w, h) * 0.55;
+            const count = Math.min(Math.floor((w * h) / 600), 2400);
+
+            for (let i = 0; i < count; i++) {
+                const arm = Math.floor(Math.random() * ARMS);
+                const armAngle = (arm / ARMS) * Math.PI * 2;
+
+                // Distance from center — weighted toward middle
+                const t = Math.random();
+                const dist = t * t * maxRadius * 0.3 + t * maxRadius * 0.7;
+
+                // Spiral angle increases with distance
+                const spiralAngle = armAngle + (dist / maxRadius) * Math.PI * 2.2;
+
+                // Scatter perpendicular to arm
+                const scatter = (Math.random() - 0.5) * ARM_SPREAD * (1 + dist / maxRadius * 0.8);
+
+                const size = dist < maxRadius * 0.15
+                    ? Math.random() * 1.5 + 0.8
+                    : Math.random() * 2 + 0.3;
+
+                const brightness = dist < maxRadius * 0.2
+                    ? Math.random() * 0.4 + 0.5
+                    : Math.random() * 0.35 + 0.1;
+
+                // Core stars are brighter/whiter
+                const color = dist < maxRadius * 0.15
+                    ? palette[0]
+                    : randomColor();
+
+                stars.push({
+                    dist: dist,
+                    angle: spiralAngle,
+                    scatter: scatter,
+                    r: size,
+                    alpha: brightness,
+                    color: color,
+                    pulse: Math.random() * Math.PI * 2,
+                    pulseSpeed: Math.random() * 0.02 + 0.008,
+                    orbitSpeed: (0.15 + Math.random() * 0.1) / (1 + dist / maxRadius * 2),
+                    x: 0, y: 0
+                });
+            }
+        }
+
+        function drawStars() {
+            const maxRadius = Math.max(w, h) * 0.55;
+
+            for (let i = 0; i < stars.length; i++) {
+                const s = stars[i];
+                const c = s.color;
+
+                // Orbit — inner stars faster
+                s.angle += s.orbitSpeed * ROTATION_SPEED;
+                s.pulse += s.pulseSpeed;
+
+                const angle = s.angle + s.scatter;
+
+                // 3D-ish: elliptical projection for tilt
+                const rawX = Math.cos(angle) * s.dist;
+                const rawY = Math.sin(angle) * s.dist * GALAXY_TILT;
+
+                // Mouse gravitational warp
+                let sx = cx + rawX;
+                let sy = cy + rawY;
+
+                if (mouse.x !== null) {
+                    const dx = sx - mouse.x;
+                    const dy = sy - mouse.y;
+                    const md = Math.sqrt(dx * dx + dy * dy);
+                    if (md < 200) {
+                        const force = (1 - md / 200) * 25;
+                        sx += (dx / md) * force;
+                        sy += (dy / md) * force;
+                    }
+                }
+
+                s.x = sx;
+                s.y = sy;
+
+                const pulseAlpha = s.alpha * (0.7 + 0.3 * Math.sin(s.pulse));
+
+                // Glow for brighter stars
+                if (s.r > 1.2) {
+                    const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 5);
+                    glow.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, ${pulseAlpha * 0.2})`);
+                    glow.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
+                    ctx.fillStyle = glow;
+                    ctx.fillRect(sx - s.r * 5, sy - s.r * 5, s.r * 10, s.r * 10);
+                }
+
+                // Core dot
+                ctx.beginPath();
+                ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${pulseAlpha})`;
+                ctx.fill();
+
+                // Connect nearby spiral neighbors (check limited range for perf)
+                const jEnd = Math.min(i + 15, stars.length);
+                for (let j = i + 1; j < jEnd; j++) {
+                    const s2 = stars[j];
+                    const dx = s.x - s2.x;
+                    const dy = s.y - s2.y;
+                    const dist = dx * dx + dy * dy;
+                    if (dist < 1600) { // 40px
+                        const alpha = 0.06 * (1 - Math.sqrt(dist) / 40);
+                        ctx.beginPath();
+                        ctx.moveTo(s.x, s.y);
+                        ctx.lineTo(s2.x, s2.y);
+                        ctx.strokeStyle = `rgba(180, 195, 220, ${alpha})`;
+                        ctx.lineWidth = 0.4;
+                        ctx.stroke();
+                    }
+                }
+
+                // Mouse connection
+                if (mouse.x !== null) {
+                    const dx = sx - mouse.x;
+                    const dy = sy - mouse.y;
+                    const md = Math.sqrt(dx * dx + dy * dy);
+                    if (md < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(sx, sy);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = `rgba(220, 225, 240, ${0.12 * (1 - md / 120)})`;
+                        ctx.lineWidth = 0.6;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // === Dust lanes (faint curved bands along spiral arms) ===
+        function createDust() {
+            dustParticles = [];
+            const maxRadius = Math.max(w, h) * 0.55;
+            const count = Math.floor(Math.min((w * h) / 3000, 400));
+
+            for (let i = 0; i < count; i++) {
+                const arm = Math.floor(Math.random() * ARMS);
+                const armAngle = (arm / ARMS) * Math.PI * 2;
+                const t = Math.random();
+                const dist = t * maxRadius * 0.9 + maxRadius * 0.08;
+                const spiralAngle = armAngle + (dist / maxRadius) * Math.PI * 2.2;
+                const scatter = (Math.random() - 0.5) * 0.2;
+
+                dustParticles.push({
+                    dist: dist,
+                    angle: spiralAngle + scatter,
+                    r: Math.random() * 20 + 10,
+                    alpha: Math.random() * 0.025 + 0.008,
+                    orbitSpeed: (0.12 + Math.random() * 0.05) / (1 + dist / maxRadius * 2),
+                    color: palette[2 + Math.floor(Math.random() * 2)]
+                });
+            }
+        }
+
+        function drawDust() {
+            for (const d of dustParticles) {
+                d.angle += d.orbitSpeed * ROTATION_SPEED;
+                const dx = cx + Math.cos(d.angle) * d.dist;
+                const dy = cy + Math.sin(d.angle) * d.dist * GALAXY_TILT;
+                const c = d.color;
+
+                const grad = ctx.createRadialGradient(dx, dy, 0, dx, dy, d.r);
+                grad.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, ${d.alpha})`);
+                grad.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(dx - d.r, dy - d.r, d.r * 2, d.r * 2);
+            }
+        }
+
+        // === Galaxy core glow ===
+        function drawCore() {
+            // Outer haze
+            const r1 = Math.max(w, h) * 0.2;
+            const grad1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, r1);
+            grad1.addColorStop(0, 'rgba(200, 210, 230, 0.08)');
+            grad1.addColorStop(0.3, 'rgba(170, 185, 215, 0.04)');
+            grad1.addColorStop(0.7, 'rgba(140, 160, 200, 0.015)');
+            grad1.addColorStop(1, 'rgba(140, 160, 200, 0)');
+            ctx.fillStyle = grad1;
+            ctx.fillRect(cx - r1, cy - r1, r1 * 2, r1 * 2);
+
+            // Inner bright core
+            const r2 = Math.max(w, h) * 0.08;
+            const pulse = 0.06 + Math.sin(time * 0.5) * 0.015;
+            const grad2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, r2);
+            grad2.addColorStop(0, `rgba(240, 243, 250, ${pulse})`);
+            grad2.addColorStop(0.5, `rgba(200, 210, 230, ${pulse * 0.4})`);
+            grad2.addColorStop(1, 'rgba(170, 185, 215, 0)');
+            ctx.fillStyle = grad2;
+            ctx.fillRect(cx - r2, cy - r2, r2 * 2, r2 * 2);
+        }
+
+        // === Shooting streaks that follow curved orbital paths ===
+        const streakColors = [
+            { r: 255, g: 255, b: 255, hr: 255, hg: 255, hb: 255 },
+            { r: 210, g: 218, b: 235, hr: 240, hg: 243, hb: 250 },
+            { r: 170, g: 185, b: 210, hr: 210, hg: 218, hb: 235 },
+        ];
+
+        function spawnStreak() {
+            if (Math.random() > 0.004) return;
+            const sc = streakColors[Math.floor(Math.random() * streakColors.length)];
+            const maxR = Math.max(w, h) * 0.45;
+            const dist = Math.random() * maxR * 0.6 + maxR * 0.15;
+            const angle = Math.random() * Math.PI * 2;
+            const speed = (Math.random() * 0.04 + 0.025) * (Math.random() > 0.5 ? 1 : -1);
+
+            streaks.push({
+                dist: dist,
+                angle: angle,
+                speed: speed,
+                life: 1,
+                decay: Math.random() * 0.012 + 0.006,
+                trail: [],
+                trailMax: Math.floor(Math.random() * 20 + 15),
+                color: sc
+            });
+        }
+
+        function drawStreaks() {
+            for (let i = streaks.length - 1; i >= 0; i--) {
+                const s = streaks[i];
+                const c = s.color;
+                s.angle += s.speed;
+                s.life -= s.decay;
+
+                if (s.life <= 0) { streaks.splice(i, 1); continue; }
+
+                const sx = cx + Math.cos(s.angle) * s.dist;
+                const sy = cy + Math.sin(s.angle) * s.dist * GALAXY_TILT;
+
+                s.trail.push({ x: sx, y: sy });
+                if (s.trail.length > s.trailMax) s.trail.shift();
+
+                // Draw curved trail
+                if (s.trail.length > 2) {
+                    for (let t = 1; t < s.trail.length; t++) {
+                        const progress = t / s.trail.length;
+                        const alpha = s.life * progress * 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(s.trail[t - 1].x, s.trail[t - 1].y);
+                        ctx.lineTo(s.trail[t].x, s.trail[t].y);
+                        ctx.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
+                        ctx.lineWidth = progress * 2;
+                        ctx.stroke();
+                    }
+                }
+
+                // Bright head
+                ctx.beginPath();
+                ctx.arc(sx, sy, 2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${c.hr}, ${c.hg}, ${c.hb}, ${s.life * 0.7})`;
+                ctx.fill();
+
+                // Head glow
+                const hg = ctx.createRadialGradient(sx, sy, 0, sx, sy, 8);
+                hg.addColorStop(0, `rgba(${c.hr}, ${c.hg}, ${c.hb}, ${s.life * 0.3})`);
+                hg.addColorStop(1, `rgba(${c.hr}, ${c.hg}, ${c.hb}, 0)`);
+                ctx.fillStyle = hg;
+                ctx.fillRect(sx - 8, sy - 8, 16, 16);
+            }
+        }
+
+        // === Main loop ===
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+            time += 0.008;
+
+            drawBgStars();
+            drawCore();
+            drawDust();
+            drawStars();
+            spawnStreak();
+            drawStreaks();
+
+            requestAnimationFrame(draw);
+        }
+
+        const hero = document.getElementById('hero');
+        hero.addEventListener('mousemove', (e) => {
+            const rect = hero.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+        hero.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        window.addEventListener('resize', resize);
+        resize();
+        draw();
+    })();
+
+    // === Scroll Progress Bar ===
+    const progressBar = document.getElementById('scrollProgress');
+    window.addEventListener('scroll', () => {
+        const scrollTop = document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const progress = (scrollTop / scrollHeight) * 100;
+        progressBar.style.width = progress + '%';
+    });
+
+    // === Nav scroll effect & active section highlight ===
+    const nav = document.getElementById('mainNav');
+    const navLinks = document.querySelectorAll('nav ul li a');
+    const sections = document.querySelectorAll('section[id]');
+
+    window.addEventListener('scroll', () => {
+        // Nav background
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+
+        // Active section
+        let current = '';
+        sections.forEach(section => {
+            const top = section.offsetTop - 100;
+            if (window.scrollY >= top) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + current) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    // === Intersection Observer for scroll reveals ===
+    const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+    let revealDelay = 0;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                // Stagger siblings
+                const parent = entry.target.parentElement;
+                const siblings = parent.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+                let delay = 0;
+                siblings.forEach(sib => {
+                    if (sib === entry.target) {
+                        entry.target.style.transitionDelay = delay + 'ms';
+                    }
+                    delay += 80;
+                });
+
+                entry.target.classList.add('in-view');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -40px 0px'
+    });
+
+    revealElements.forEach(el => observer.observe(el));
+
+    // === Counter animation for stats ===
+    const statElements = document.querySelectorAll('.stat-value');
+    const statObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const target = parseFloat(el.dataset.target);
+                const decimals = parseInt(el.dataset.decimals) || 0;
+                const prefix = el.dataset.prefix || '';
+                const suffix = el.dataset.suffix || '';
+                const duration = 1500;
+                const start = performance.now();
+
+                function update(now) {
+                    const elapsed = now - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    // Ease out cubic
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const current = eased * target;
+                    el.textContent = prefix + current.toFixed(decimals) + suffix;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    }
+                }
+
+                requestAnimationFrame(update);
+                statObserver.unobserve(el);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    statElements.forEach(el => statObserver.observe(el));
+
+    // === Article modals ===
+    function openArticle(id) {
+        const modal = document.getElementById('article-' + id);
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeArticle() {
+        document.querySelectorAll('.article-modal').forEach(m => m.classList.remove('active'));
+        document.body.style.overflow = '';
+    }
+
+    // Close on backdrop click
+    document.querySelectorAll('.article-modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeArticle();
+        });
+    });
+
+    // Close on Escape key (articles + certs)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeArticle();
+            closeCert();
+        }
+    });
+
+    // === Certification PDF viewer ===
+    function openCert(file, title) {
+        const modal = document.getElementById('certModal');
+        const frame = document.getElementById('certModalFrame');
+        const titleEl = document.getElementById('certModalTitle');
+        titleEl.textContent = title;
+        frame.src = file;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCert() {
+        const modal = document.getElementById('certModal');
+        const frame = document.getElementById('certModalFrame');
+        modal.classList.remove('active');
+        frame.src = '';
+        document.body.style.overflow = '';
+    }
+
+    // Close cert modal on backdrop click
+    document.getElementById('certModal').addEventListener('click', (e) => {
+        if (e.target.classList.contains('cert-modal')) closeCert();
+    });
+
+    // === Contact form (Formspree AJAX) ===
+    const contactForm = document.getElementById('contactForm');
+    const formStatus = document.getElementById('formStatus');
+    const contactSubmit = document.getElementById('contactSubmit');
+
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        contactSubmit.disabled = true;
+        contactSubmit.textContent = 'Sending...';
+
+        fetch(contactForm.action, {
+            method: 'POST',
+            body: new FormData(contactForm),
+            headers: { 'Accept': 'application/json' }
+        }).then(response => {
+            if (response.ok) {
+                formStatus.textContent = 'Message sent! I\'ll get back to you soon.';
+                formStatus.style.display = 'block';
+                formStatus.style.color = '#16a34a';
+                contactForm.reset();
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.errors ? data.errors.map(e => e.message).join(', ') : 'Something went wrong.');
+                });
+            }
+        }).catch(error => {
+            formStatus.textContent = error.message || 'Oops — something went wrong. Please try again.';
+            formStatus.style.display = 'block';
+            formStatus.style.color = '#dc2626';
+        }).finally(() => {
+            contactSubmit.disabled = false;
+            contactSubmit.textContent = 'Send Message';
+        });
+    });
+
+    // === Parallax on hero (content only, not the section itself) ===
+    window.addEventListener('scroll', () => {
+        const heroContent = document.querySelector('.hero-content');
+        const scrolled = window.scrollY;
+        if (scrolled < window.innerHeight) {
+            heroContent.style.transform = `translateY(${scrolled * 0.25}px)`;
+            heroContent.style.opacity = 1 - (scrolled / window.innerHeight) * 0.6;
+        }
+    });
+    </script>
+
+</body>
+</html>
