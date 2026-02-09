@@ -1495,375 +1495,419 @@
     </footer>
 
     <script>
-    // === Galaxy Hero Background ===
+    // === Bloomberg Terminal-Style Hero Background ===
     (function() {
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
-        let w, h, cx, cy;
-        let mouse = { x: null, y: null };
-        let time = 0;
-        let stars = [];
-        let dustParticles = [];
-        let streaks = [];
-        let bgStars = [];
+        let w, h;
+        const NUM_CHARTS = 3;
+        const TICK_EDGE = 0.85; // new candles appear at 85% width
+        const TICK_INTERVAL = 1200; // ms, synced with bottom ticker strip
+        const BAR_STEP = 6; // tight spacing for clean lines
 
-        const palette = [
-            { r: 255, g: 255, b: 255 },
-            { r: 210, g: 218, b: 235 },
-            { r: 170, g: 185, b: 210 },
-            { r: 140, g: 160, b: 200 },
-            { r: 230, g: 235, b: 245 },
+        // Chart state
+        let charts = [];
+
+        // --- Ticker symbols drawn on canvas ---
+        const tickerSymbols = [
+            { sym: 'SPX', base: 5842.50 },
+            { sym: 'DJIA', base: 42650.00 },
+            { sym: 'IXIC', base: 18820.75 },
+            { sym: 'VIX', base: 16.42 },
+            { sym: 'TNX', base: 4.285 },
+            { sym: 'AAPL', base: 232.15 },
+            { sym: 'MSFT', base: 415.60 },
+            { sym: 'GOOGL', base: 192.30 },
+            { sym: 'AMZN', base: 228.45 },
+            { sym: 'NVDA', base: 138.20 },
+            { sym: 'META', base: 612.80 },
+            { sym: 'TSLA', base: 385.50 },
+            { sym: 'JPM', base: 252.10 },
+            { sym: 'GS', base: 598.40 },
+            { sym: 'BRK.B', base: 468.20 },
+            { sym: 'XOM', base: 108.90 },
+            { sym: 'GLD', base: 238.50 },
+            { sym: 'BTC', base: 97450.00 },
+            { sym: 'ETH', base: 3280.00 },
+            { sym: 'EUR/USD', base: 1.0342 },
+            { sym: 'CL1', base: 72.85 },
         ];
-
-        function randomColor() {
-            return palette[Math.floor(Math.random() * palette.length)];
+        const tickerData = tickerSymbols.map(s => {
+            const change = (Math.random() - 0.45) * s.base * 0.02;
+            return {
+                sym: s.sym,
+                base: s.base,
+                price: s.base + change,
+                change: change,
+                changePct: (change / s.base) * 100,
+            };
+        });
+        function tickTickerPrices() {
+            for (const d of tickerData) {
+                const drift = (d.base - d.price) * 0.002;
+                const shock = (Math.random() - 0.5) * d.base * 0.003;
+                d.price += drift + shock;
+                d.change = d.price - d.base;
+                d.changePct = (d.change / d.base) * 100;
+            }
         }
+        let tickerScrollX = 0;
 
-        // === Galaxy parameters ===
-        const ARMS = 3;
-        const ARM_SPREAD = 0.6;
-        const ROTATION_SPEED = 0.015;
-        const GALAXY_TILT = 0.55;
-
+        // --- Resize ---
         function resize() {
             const hero = document.getElementById('hero');
             w = canvas.width = hero.offsetWidth;
             h = canvas.height = hero.offsetHeight;
-            cx = w * 0.5;
-            cy = h * 0.48;
-            createStars();
-            createDust();
-            createBgStars();
+            initCharts();
         }
 
-        // === Background static stars (tiny, twinkling) ===
-        function createBgStars() {
-            bgStars = [];
-            const count = Math.floor((w * h) / 400);
-            for (let i = 0; i < count; i++) {
-                bgStars.push({
-                    x: Math.random() * w,
-                    y: Math.random() * h,
-                    r: Math.random() * 1.2 + 0.15,
-                    alpha: Math.random() * 0.6 + 0.08,
-                    twinkleSpeed: Math.random() * 0.03 + 0.005,
-                    twinklePhase: Math.random() * Math.PI * 2,
-                    color: randomColor()
-                });
+        // --- Realistic price generator ---
+        // Uses momentum, mean-reversion, support/resistance, and occasional volatility spikes
+        function nextPrice(chart) {
+            // Regime shifts: occasionally change trend
+            if (Math.random() < 0.03) {
+                chart.trend = (Math.random() - 0.5) * 0.8;
+            }
+            // Volatility clustering (GARCH-like)
+            chart.vol = chart.vol * 0.92 + chart.baseVol * 0.08 + Math.abs(chart.lastReturn) * 0.15;
+            if (Math.random() < 0.04) chart.vol *= 1.5 + Math.random(); // vol spike
+
+            // Mean reversion toward opening price (rubber band)
+            const reversion = (chart.openPrice - chart.price) * 0.006;
+            // Momentum
+            chart.momentum = chart.momentum * 0.88 + (Math.random() - 0.5) * 0.3;
+            // Support/resistance bounce
+            let srBounce = 0;
+            for (const level of chart.srLevels) {
+                const dist = chart.price - level;
+                if (Math.abs(dist) < chart.baseVol * 3) {
+                    srBounce -= dist * 0.015; // push away from level
+                }
+            }
+
+            const shock = (Math.random() - 0.5) * chart.vol * 2;
+            const ret = chart.trend * 0.15 + chart.momentum * 0.3 + reversion + srBounce + shock;
+            chart.lastReturn = ret;
+            chart.price += ret;
+
+            // Generate OHLC candle
+            const open = chart.price;
+            const bodySize = Math.abs((Math.random() - 0.5 + chart.trend * 0.3 + chart.momentum * 0.2) * chart.vol * 2.5);
+            const direction = (Math.random() + chart.trend * 0.3 + chart.momentum * 0.15) > 0.5 ? 1 : -1;
+            const close = open + direction * bodySize;
+            const upperWick = Math.random() * chart.vol * 1.8;
+            const lowerWick = Math.random() * chart.vol * 1.8;
+            const high = Math.max(open, close) + upperWick;
+            const low = Math.min(open, close) - lowerWick;
+
+            chart.price = close;
+
+            return { open, high, low, close, isUp: close >= open };
+        }
+
+        // --- Initialize charts ---
+        function initCharts() {
+            charts = [];
+            // Overlapping charts: each uses 40% height, centers spread across 45% of hero
+            const chartH = h * 0.40;
+            const totalSpan = h * 0.45;
+            const zoneTop = (h - totalSpan) * 0.5;
+            const tickX = w * TICK_EDGE;
+            const maxBars = Math.floor(tickX / BAR_STEP) + 2;
+            const centerStep = NUM_CHARTS > 1 ? totalSpan / (NUM_CHARTS - 1) : 0;
+
+            for (let ci = 0; ci < NUM_CHARTS; ci++) {
+                const centerY = zoneTop + ci * centerStep;
+                const baseVol = 1.2 + Math.random() * 1.5;
+                const openPrice = 100 + Math.random() * 80;
+
+                const chart = {
+                    centerY,
+                    chartH,
+                    baseVol,
+                    vol: baseVol,
+                    openPrice,
+                    price: openPrice,
+                    trend: (Math.random() - 0.5) * 0.5,
+                    momentum: 0,
+                    lastReturn: 0,
+                    srLevels: [], // support/resistance
+                    bars: [],     // OHLC bars with pixel-y values
+                    scrollOffset: 0,
+                    label: ['SPX', 'IXIC', 'DJI'][ci],
+                };
+
+                // Create some support/resistance levels
+                for (let s = 0; s < 3; s++) {
+                    chart.srLevels.push(openPrice + (Math.random() - 0.5) * baseVol * 25);
+                }
+
+                // Generate 3x the visible bars, then only keep the last maxBars.
+                // This means the visible window starts deep into an established pattern.
+                const totalGen = maxBars * 3;
+                const allBars = [];
+                for (let i = 0; i < totalGen; i++) {
+                    allBars.push(nextPrice(chart));
+                }
+                chart.bars = allBars.slice(totalGen - maxBars);
+                // Set openPrice to the first visible bar so change% is meaningful
+                chart.openPrice = chart.bars[0].close;
+
+                charts.push(chart);
             }
         }
 
-        function drawBgStars() {
-            for (const s of bgStars) {
-                s.twinklePhase += s.twinkleSpeed;
-                const a = s.alpha * (0.5 + 0.5 * Math.sin(s.twinklePhase));
-                const c = s.color;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${a})`;
-                ctx.fill();
-            }
-        }
-
-        // === Spiral galaxy stars ===
-        function createStars() {
-            stars = [];
-            const maxRadius = Math.max(w, h) * 0.55;
-            const count = Math.min(Math.floor((w * h) / 600), 2400);
-
-            for (let i = 0; i < count; i++) {
-                const arm = Math.floor(Math.random() * ARMS);
-                const armAngle = (arm / ARMS) * Math.PI * 2;
-
-                // Distance from center — weighted toward middle
-                const t = Math.random();
-                const dist = t * t * maxRadius * 0.3 + t * maxRadius * 0.7;
-
-                // Spiral angle increases with distance
-                const spiralAngle = armAngle + (dist / maxRadius) * Math.PI * 2.2;
-
-                // Scatter perpendicular to arm
-                const scatter = (Math.random() - 0.5) * ARM_SPREAD * (1 + dist / maxRadius * 0.8);
-
-                const size = dist < maxRadius * 0.15
-                    ? Math.random() * 1.5 + 0.8
-                    : Math.random() * 2 + 0.3;
-
-                const brightness = dist < maxRadius * 0.2
-                    ? Math.random() * 0.4 + 0.5
-                    : Math.random() * 0.35 + 0.1;
-
-                // Core stars are brighter/whiter
-                const color = dist < maxRadius * 0.15
-                    ? palette[0]
-                    : randomColor();
-
-                stars.push({
-                    dist: dist,
-                    angle: spiralAngle,
-                    scatter: scatter,
-                    r: size,
-                    alpha: brightness,
-                    color: color,
-                    pulse: Math.random() * Math.PI * 2,
-                    pulseSpeed: Math.random() * 0.02 + 0.008,
-                    orbitSpeed: (0.15 + Math.random() * 0.1) / (1 + dist / maxRadius * 2),
-                    x: 0, y: 0
-                });
-            }
-        }
-
-        function drawStars() {
-            const maxRadius = Math.max(w, h) * 0.55;
-
-            for (let i = 0; i < stars.length; i++) {
-                const s = stars[i];
-                const c = s.color;
-
-                // Orbit — inner stars faster
-                s.angle += s.orbitSpeed * ROTATION_SPEED;
-                s.pulse += s.pulseSpeed;
-
-                const angle = s.angle + s.scatter;
-
-                // 3D-ish: elliptical projection for tilt
-                const rawX = Math.cos(angle) * s.dist;
-                const rawY = Math.sin(angle) * s.dist * GALAXY_TILT;
-
-                // Mouse gravitational warp
-                let sx = cx + rawX;
-                let sy = cy + rawY;
-
-                if (mouse.x !== null) {
-                    const dx = sx - mouse.x;
-                    const dy = sy - mouse.y;
-                    const md = Math.sqrt(dx * dx + dy * dy);
-                    if (md < 200) {
-                        const force = (1 - md / 200) * 25;
-                        sx += (dx / md) * force;
-                        sy += (dy / md) * force;
-                    }
-                }
-
-                s.x = sx;
-                s.y = sy;
-
-                const pulseAlpha = s.alpha * (0.7 + 0.3 * Math.sin(s.pulse));
-
-                // Glow for brighter stars
-                if (s.r > 1.2) {
-                    const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 5);
-                    glow.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, ${pulseAlpha * 0.2})`);
-                    glow.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
-                    ctx.fillStyle = glow;
-                    ctx.fillRect(sx - s.r * 5, sy - s.r * 5, s.r * 10, s.r * 10);
-                }
-
-                // Core dot
-                ctx.beginPath();
-                ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${pulseAlpha})`;
-                ctx.fill();
-
-                // Connect nearby spiral neighbors (check limited range for perf)
-                const jEnd = Math.min(i + 15, stars.length);
-                for (let j = i + 1; j < jEnd; j++) {
-                    const s2 = stars[j];
-                    const dx = s.x - s2.x;
-                    const dy = s.y - s2.y;
-                    const dist = dx * dx + dy * dy;
-                    if (dist < 1600) { // 40px
-                        const alpha = 0.06 * (1 - Math.sqrt(dist) / 40);
-                        ctx.beginPath();
-                        ctx.moveTo(s.x, s.y);
-                        ctx.lineTo(s2.x, s2.y);
-                        ctx.strokeStyle = `rgba(180, 195, 220, ${alpha})`;
-                        ctx.lineWidth = 0.4;
-                        ctx.stroke();
-                    }
-                }
-
-                // Mouse connection
-                if (mouse.x !== null) {
-                    const dx = sx - mouse.x;
-                    const dy = sy - mouse.y;
-                    const md = Math.sqrt(dx * dx + dy * dy);
-                    if (md < 120) {
-                        ctx.beginPath();
-                        ctx.moveTo(sx, sy);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.strokeStyle = `rgba(220, 225, 240, ${0.12 * (1 - md / 120)})`;
-                        ctx.lineWidth = 0.6;
-                        ctx.stroke();
-                    }
+        // --- Tick: add a new candle to each chart (called on interval) ---
+        function tickAllCharts() {
+            for (const chart of charts) {
+                const candle = nextPrice(chart);
+                chart.bars.push(candle);
+                // Trim old bars to keep memory bounded
+                const tickX = w * TICK_EDGE;
+                const maxBars = Math.floor(tickX / BAR_STEP) + 10;
+                if (chart.bars.length > maxBars) {
+                    chart.bars = chart.bars.slice(chart.bars.length - maxBars);
                 }
             }
         }
 
-        // === Dust lanes (faint curved bands along spiral arms) ===
-        function createDust() {
-            dustParticles = [];
-            const maxRadius = Math.max(w, h) * 0.55;
-            const count = Math.floor(Math.min((w * h) / 3000, 400));
+        // --- Smooth scroll: animate bars sliding left between ticks ---
+        let scrollAnim = 0; // 0..1, how far through current tick's slide
 
-            for (let i = 0; i < count; i++) {
-                const arm = Math.floor(Math.random() * ARMS);
-                const armAngle = (arm / ARMS) * Math.PI * 2;
-                const t = Math.random();
-                const dist = t * maxRadius * 0.9 + maxRadius * 0.08;
-                const spiralAngle = armAngle + (dist / maxRadius) * Math.PI * 2.2;
-                const scatter = (Math.random() - 0.5) * 0.2;
+        // --- Price to Y mapping using rolling local scale ---
+        // Each bar gets its own local min/max from a window around it,
+        // so every section of the chart fills the vertical space.
+        const ROLL_WINDOW = 40; // bars on each side for local scale
 
-                dustParticles.push({
-                    dist: dist,
-                    angle: spiralAngle + scatter,
-                    r: Math.random() * 20 + 10,
-                    alpha: Math.random() * 0.025 + 0.008,
-                    orbitSpeed: (0.12 + Math.random() * 0.05) / (1 + dist / maxRadius * 2),
-                    color: palette[2 + Math.floor(Math.random() * 2)]
-                });
-            }
-        }
+        function computeRollingScale(visibleBars, chartH, baseVol) {
+            const n = visibleBars.length;
+            const yData = new Float64Array(n);
 
-        function drawDust() {
-            for (const d of dustParticles) {
-                d.angle += d.orbitSpeed * ROTATION_SPEED;
-                const dx = cx + Math.cos(d.angle) * d.dist;
-                const dy = cy + Math.sin(d.angle) * d.dist * GALAXY_TILT;
-                const c = d.color;
+            // Pre-compute rolling min/max for each bar
+            const localMin = new Float64Array(n);
+            const localMax = new Float64Array(n);
 
-                const grad = ctx.createRadialGradient(dx, dy, 0, dx, dy, d.r);
-                grad.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, ${d.alpha})`);
-                grad.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
-                ctx.fillStyle = grad;
-                ctx.fillRect(dx - d.r, dy - d.r, d.r * 2, d.r * 2);
-            }
-        }
-
-        // === Galaxy core glow ===
-        function drawCore() {
-            // Outer haze
-            const r1 = Math.max(w, h) * 0.2;
-            const grad1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, r1);
-            grad1.addColorStop(0, 'rgba(200, 210, 230, 0.08)');
-            grad1.addColorStop(0.3, 'rgba(170, 185, 215, 0.04)');
-            grad1.addColorStop(0.7, 'rgba(140, 160, 200, 0.015)');
-            grad1.addColorStop(1, 'rgba(140, 160, 200, 0)');
-            ctx.fillStyle = grad1;
-            ctx.fillRect(cx - r1, cy - r1, r1 * 2, r1 * 2);
-
-            // Inner bright core
-            const r2 = Math.max(w, h) * 0.08;
-            const pulse = 0.06 + Math.sin(time * 0.5) * 0.015;
-            const grad2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, r2);
-            grad2.addColorStop(0, `rgba(240, 243, 250, ${pulse})`);
-            grad2.addColorStop(0.5, `rgba(200, 210, 230, ${pulse * 0.4})`);
-            grad2.addColorStop(1, 'rgba(170, 185, 215, 0)');
-            ctx.fillStyle = grad2;
-            ctx.fillRect(cx - r2, cy - r2, r2 * 2, r2 * 2);
-        }
-
-        // === Shooting streaks that follow curved orbital paths ===
-        const streakColors = [
-            { r: 255, g: 255, b: 255, hr: 255, hg: 255, hb: 255 },
-            { r: 210, g: 218, b: 235, hr: 240, hg: 243, hb: 250 },
-            { r: 170, g: 185, b: 210, hr: 210, hg: 218, hb: 235 },
-        ];
-
-        function spawnStreak() {
-            if (Math.random() > 0.004) return;
-            const sc = streakColors[Math.floor(Math.random() * streakColors.length)];
-            const maxR = Math.max(w, h) * 0.45;
-            const dist = Math.random() * maxR * 0.6 + maxR * 0.15;
-            const angle = Math.random() * Math.PI * 2;
-            const speed = (Math.random() * 0.04 + 0.025) * (Math.random() > 0.5 ? 1 : -1);
-
-            streaks.push({
-                dist: dist,
-                angle: angle,
-                speed: speed,
-                life: 1,
-                decay: Math.random() * 0.012 + 0.006,
-                trail: [],
-                trailMax: Math.floor(Math.random() * 20 + 15),
-                color: sc
-            });
-        }
-
-        function drawStreaks() {
-            for (let i = streaks.length - 1; i >= 0; i--) {
-                const s = streaks[i];
-                const c = s.color;
-                s.angle += s.speed;
-                s.life -= s.decay;
-
-                if (s.life <= 0) { streaks.splice(i, 1); continue; }
-
-                const sx = cx + Math.cos(s.angle) * s.dist;
-                const sy = cy + Math.sin(s.angle) * s.dist * GALAXY_TILT;
-
-                s.trail.push({ x: sx, y: sy });
-                if (s.trail.length > s.trailMax) s.trail.shift();
-
-                // Draw curved trail
-                if (s.trail.length > 2) {
-                    for (let t = 1; t < s.trail.length; t++) {
-                        const progress = t / s.trail.length;
-                        const alpha = s.life * progress * 0.5;
-                        ctx.beginPath();
-                        ctx.moveTo(s.trail[t - 1].x, s.trail[t - 1].y);
-                        ctx.lineTo(s.trail[t].x, s.trail[t].y);
-                        ctx.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
-                        ctx.lineWidth = progress * 2;
-                        ctx.stroke();
-                    }
+            for (let i = 0; i < n; i++) {
+                let lo = Infinity, hi = -Infinity;
+                const from = Math.max(0, i - ROLL_WINDOW);
+                const to = Math.min(n - 1, i + ROLL_WINDOW);
+                for (let j = from; j <= to; j++) {
+                    const c = visibleBars[j].close;
+                    if (c < lo) lo = c;
+                    if (c > hi) hi = c;
                 }
-
-                // Bright head
-                ctx.beginPath();
-                ctx.arc(sx, sy, 2, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${c.hr}, ${c.hg}, ${c.hb}, ${s.life * 0.7})`;
-                ctx.fill();
-
-                // Head glow
-                const hg = ctx.createRadialGradient(sx, sy, 0, sx, sy, 8);
-                hg.addColorStop(0, `rgba(${c.hr}, ${c.hg}, ${c.hb}, ${s.life * 0.3})`);
-                hg.addColorStop(1, `rgba(${c.hr}, ${c.hg}, ${c.hb}, 0)`);
-                ctx.fillStyle = hg;
-                ctx.fillRect(sx - 8, sy - 8, 16, 16);
+                // Enforce minimum range
+                let range = hi - lo;
+                const minRange = baseVol * 6;
+                if (range < minRange) {
+                    const mid = (hi + lo) * 0.5;
+                    lo = mid - minRange * 0.5;
+                    hi = mid + minRange * 0.5;
+                    range = minRange;
+                }
+                localMin[i] = lo;
+                localMax[i] = hi;
             }
+
+            // Convert prices to Y positions using local scale
+            const padding = chartH * 0.10;
+            const drawH = chartH - padding * 2;
+            for (let i = 0; i < n; i++) {
+                const range = localMax[i] - localMin[i] || 1;
+                // 0 = top, 1 = bottom  => invert so higher price = higher on screen
+                const normalized = (visibleBars[i].close - localMin[i]) / range;
+                yData[i] = (1 - normalized) * drawH + padding; // relative to chart top
+            }
+            return yData;
         }
 
-        // === Main loop ===
+        // --- Draw ---
         function draw() {
             ctx.clearRect(0, 0, w, h);
-            time += 0.008;
+            const tickX = w * TICK_EDGE;
 
-            drawBgStars();
-            drawCore();
-            drawDust();
-            drawStars();
-            spawnStreak();
-            drawStreaks();
+            // Grid
+            ctx.strokeStyle = 'rgba(192, 200, 212, 0.06)';
+            ctx.lineWidth = 0.5;
+            const hCount = NUM_CHARTS * 3;
+            for (let i = 0; i <= hCount; i++) {
+                const y = (h / hCount) * i;
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+            const vCount = Math.floor(w / 100);
+            for (let i = 0; i <= vCount; i++) {
+                const x = (w / vCount) * i;
+                ctx.strokeStyle = Math.abs(x - tickX) < 5 ? 'rgba(192, 200, 212, 0.15)' : 'rgba(192, 200, 212, 0.06)';
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            }
+
+            // Draw each chart (overlapping, no separators)
+            for (const chart of charts) {
+                const bars = chart.bars;
+                if (bars.length < 2) continue;
+
+                // Determine visible bar range
+                const visibleCount = Math.floor(tickX / BAR_STEP) + 1;
+                const startIdx = Math.max(0, bars.length - visibleCount);
+                const visibleBars = bars.slice(startIdx);
+
+                // Rolling local auto-scale so every section fills the vertical space
+                const yData = computeRollingScale(visibleBars, chart.chartH, chart.baseVol);
+                const chartTop = chart.centerY - chart.chartH * 0.5;
+
+                // X position: rightmost bar at tickX, scrolling left by scrollAnim
+                const slideOffset = scrollAnim * BAR_STEP;
+
+                // Determine if current price is up from open (for number color only)
+                const currentClose = visibleBars[visibleBars.length - 1].close;
+                const isPositive = currentClose >= chart.openPrice;
+
+                // All lines/fills are always silver
+                const lineColor = 'rgba(192, 200, 212, 0.50)';
+                const fillColorTop = 'rgba(192, 200, 212, 0.06)';
+                const fillColorBot = 'rgba(0, 0, 0, 0)';
+                const dashColor = 'rgba(192, 200, 212, 0.30)';
+                const priceBoxBg = 'rgba(192, 200, 212, 0.85)';
+                const priceBoxText = isPositive ? '#00cc6a' : '#000';
+
+                // --- Draw area fill under line ---
+                ctx.beginPath();
+                for (let i = 0; i < visibleBars.length; i++) {
+                    const x = tickX - (visibleBars.length - 1 - i) * BAR_STEP - slideOffset;
+                    const y = chartTop + yData[i];
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                const lastDrawX = tickX - slideOffset;
+                const firstDrawX = tickX - (visibleBars.length - 1) * BAR_STEP - slideOffset;
+                const bottomY = chartTop + chart.chartH;
+                ctx.lineTo(lastDrawX, bottomY);
+                ctx.lineTo(firstDrawX, bottomY);
+                ctx.closePath();
+                const grad = ctx.createLinearGradient(0, chartTop, 0, bottomY);
+                grad.addColorStop(0, fillColorTop);
+                grad.addColorStop(1, fillColorBot);
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                // --- Draw closing-price line ---
+                ctx.beginPath();
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 1.2;
+                for (let i = 0; i < visibleBars.length; i++) {
+                    const x = tickX - (visibleBars.length - 1 - i) * BAR_STEP - slideOffset;
+                    const y = chartTop + yData[i];
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                // --- Current price dashed line + price box ---
+                const lastIdx = visibleBars.length - 1;
+                const curY = chartTop + yData[lastIdx];
+                const curX = tickX - slideOffset;
+
+                ctx.strokeStyle = dashColor;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(curX, curY);
+                ctx.lineTo(w * 0.96, curY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Price box
+                const lastBar = visibleBars[lastIdx];
+                const priceText = lastBar.close.toFixed(2);
+                ctx.font = '11px monospace';
+                const tw = ctx.measureText(priceText).width;
+                const bx = tickX + 8;
+                ctx.fillStyle = priceBoxBg;
+                ctx.fillRect(bx, curY - 9, tw + 10, 18);
+                ctx.fillStyle = priceBoxText;
+                ctx.fillText(priceText, bx + 5, curY + 4);
+
+                // Chart label
+                ctx.font = '600 11px monospace';
+                ctx.fillStyle = 'rgba(192, 200, 212, 0.25)';
+                ctx.fillText(chart.label, 12, chartTop + 20);
+
+                // Change % — green if positive, silver if negative
+                const changePct = ((lastBar.close - chart.openPrice) / chart.openPrice * 100);
+                const pctSign = changePct >= 0 ? '+' : '';
+                ctx.fillStyle = isPositive ? 'rgba(0, 204, 106, 0.45)' : 'rgba(192, 200, 212, 0.3)';
+                ctx.font = '10px monospace';
+                ctx.fillText(`${pctSign}${changePct.toFixed(2)}%`, 12 + ctx.measureText(chart.label).width + 8, chartTop + 20);
+            }
+
+            // --- Draw ticker symbols as scrolling silver text ---
+            tickerScrollX -= 0.4; // slow continuous scroll
+            ctx.font = '11px monospace';
+            const itemWidth = 160; // approx width per ticker item
+            const totalTickerWidth = tickerData.length * itemWidth;
+            // Wrap scroll
+            if (tickerScrollX < -totalTickerWidth) tickerScrollX += totalTickerWidth;
+
+            // Draw two rows: top and bottom of hero
+            const rows = [h * 0.06, h * 0.94];
+            for (const rowY of rows) {
+                // Draw two copies for seamless scroll
+                for (let copy = 0; copy < 2; copy++) {
+                    const baseX = tickerScrollX + copy * totalTickerWidth;
+                    for (let i = 0; i < tickerData.length; i++) {
+                        const d = tickerData[i];
+                        const x = baseX + i * itemWidth;
+                        // Skip if off-screen
+                        if (x > w + itemWidth || x < -itemWidth) continue;
+
+                        const decimals = d.sym === 'BTC' ? 0 : d.sym === 'EUR/USD' ? 4 : d.base > 1000 ? 0 : 2;
+                        const isUp = d.change >= 0;
+                        const pSign = isUp ? '+' : '';
+
+                        // Symbol
+                        ctx.fillStyle = 'rgba(192, 200, 212, 0.25)';
+                        ctx.fillText(d.sym, x, rowY);
+
+                        // Price
+                        const symW = ctx.measureText(d.sym).width;
+                        ctx.fillStyle = 'rgba(192, 200, 212, 0.20)';
+                        ctx.fillText(d.price.toFixed(decimals), x + symW + 6, rowY);
+
+                        // Change %
+                        const priceW = ctx.measureText(d.price.toFixed(decimals)).width;
+                        ctx.fillStyle = isUp ? 'rgba(0, 204, 106, 0.30)' : 'rgba(192, 200, 212, 0.18)';
+                        ctx.fillText(`${pSign}${d.changePct.toFixed(2)}%`, x + symW + priceW + 12, rowY);
+                    }
+                }
+            }
 
             requestAnimationFrame(draw);
         }
 
-        const hero = document.getElementById('hero');
-        hero.addEventListener('mousemove', (e) => {
-            const rect = hero.getBoundingClientRect();
-            mouse.x = e.clientX - rect.left;
-            mouse.y = e.clientY - rect.top;
-        });
-        hero.addEventListener('mouseleave', () => {
-            mouse.x = null;
-            mouse.y = null;
-        });
+        // Smooth scroll animation: between ticks, smoothly slide bars left
+        let lastTick = performance.now();
+
+        function animateScroll(now) {
+            const elapsed = now - lastTick;
+            scrollAnim = Math.min(elapsed / TICK_INTERVAL, 1);
+            requestAnimationFrame(animateScroll);
+        }
+
+        // Tick timer
+        function startTicking() {
+            setInterval(() => {
+                tickAllCharts();
+                tickTickerPrices();
+                lastTick = performance.now();
+                scrollAnim = 0;
+            }, TICK_INTERVAL);
+        }
 
         window.addEventListener('resize', resize);
         resize();
-        draw();
+        startTicking();
+        requestAnimationFrame(animateScroll);
+        requestAnimationFrame(draw);
     })();
+
 
     // === Scroll Progress Bar ===
     const progressBar = document.getElementById('scrollProgress');
