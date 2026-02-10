@@ -1508,50 +1508,72 @@
         // Chart state
         let charts = [];
 
-        // --- Ticker symbols drawn on canvas ---
-        const tickerSymbols = [
-            { sym: 'SPX', base: 5842.50 },
-            { sym: 'DJIA', base: 42650.00 },
-            { sym: 'IXIC', base: 18820.75 },
-            { sym: 'VIX', base: 16.42 },
-            { sym: 'TNX', base: 4.285 },
-            { sym: 'AAPL', base: 232.15 },
-            { sym: 'MSFT', base: 415.60 },
-            { sym: 'GOOGL', base: 192.30 },
-            { sym: 'AMZN', base: 228.45 },
-            { sym: 'NVDA', base: 138.20 },
-            { sym: 'META', base: 612.80 },
-            { sym: 'TSLA', base: 385.50 },
-            { sym: 'JPM', base: 252.10 },
-            { sym: 'GS', base: 598.40 },
-            { sym: 'BRK.B', base: 468.20 },
-            { sym: 'XOM', base: 108.90 },
-            { sym: 'GLD', base: 238.50 },
-            { sym: 'BTC', base: 97450.00 },
-            { sym: 'ETH', base: 3280.00 },
-            { sym: 'EUR/USD', base: 1.0342 },
-            { sym: 'CL1', base: 72.85 },
+        // --- Multi-layer ticker rows drawn on canvas ---
+        const tickerRows = [
+            // Row 0 — Semiconductors
+            { speed: 0.35, fontSize: 10, alpha: 0.18, yPct: 0.05, symbols: [
+                { sym: 'NVDA', base: 138.20 }, { sym: 'AMD', base: 178.50 }, { sym: 'INTC', base: 22.40 },
+                { sym: 'ASML', base: 912.30 }, { sym: 'TSM', base: 185.60 }, { sym: 'MU', base: 102.70 },
+                { sym: 'QCOM', base: 172.80 }, { sym: 'AVGO', base: 186.40 }, { sym: 'MRVL', base: 88.15 },
+                { sym: 'ON', base: 68.30 }, { sym: 'KLAC', base: 742.10 }, { sym: 'LRCX', base: 98.50 },
+            ]},
+            // Row 1 — Oil & Energy
+            { speed: 0.25, fontSize: 10, alpha: 0.14, yPct: 0.14, symbols: [
+                { sym: 'XOM', base: 108.90 }, { sym: 'CVX', base: 158.20 }, { sym: 'COP', base: 112.40 },
+                { sym: 'SLB', base: 44.80 }, { sym: 'OXY', base: 52.10 }, { sym: 'HAL', base: 32.60 },
+                { sym: 'DVN', base: 43.70 }, { sym: 'MPC', base: 162.30 }, { sym: 'VLO', base: 138.50 },
+                { sym: 'PSX', base: 128.90 }, { sym: 'EOG', base: 124.80 }, { sym: 'PXD', base: 268.40 },
+            ]},
+            // Row 2 — Airlines & Travel
+            { speed: 0.45, fontSize: 10, alpha: 0.16, yPct: 0.23, symbols: [
+                { sym: 'DAL', base: 52.80 }, { sym: 'UAL', base: 98.40 }, { sym: 'AAL', base: 16.20 },
+                { sym: 'LUV', base: 32.50 }, { sym: 'JBLU', base: 7.85 }, { sym: 'ALK', base: 48.30 },
+                { sym: 'SAVE', base: 2.15 }, { sym: 'BA', base: 178.90 }, { sym: 'RTX', base: 118.40 },
+                { sym: 'BKNG', base: 4820.00 }, { sym: 'ABNB', base: 148.60 }, { sym: 'MAR', base: 268.30 },
+            ]},
+            // Row 3 — Fintech IPOs & Growth
+            { speed: 0.30, fontSize: 10, alpha: 0.15, yPct: 0.78, symbols: [
+                { sym: 'AFRM', base: 62.40 }, { sym: 'HOOD', base: 24.80 }, { sym: 'SOFI', base: 11.20 },
+                { sym: 'NU', base: 14.50 }, { sym: 'COIN', base: 268.30 }, { sym: 'DDOG', base: 128.40 },
+                { sym: 'NET', base: 98.20 }, { sym: 'BILL', base: 82.30 }, { sym: 'MQ', base: 6.40 },
+                { sym: 'TOST', base: 38.50 }, { sym: 'RELY', base: 14.80 }, { sym: 'FLYW', base: 18.20 },
+            ]},
+            // Row 4 — Banks & Macro
+            { speed: 0.20, fontSize: 10, alpha: 0.13, yPct: 0.87, symbols: [
+                { sym: 'JPM', base: 252.10 }, { sym: 'GS', base: 598.40 }, { sym: 'MS', base: 108.30 },
+                { sym: 'BAC', base: 42.60 }, { sym: 'WFC', base: 68.20 }, { sym: 'C', base: 68.90 },
+                { sym: 'BLK', base: 948.30 }, { sym: 'SCHW', base: 78.40 }, { sym: 'ICE', base: 158.20 },
+                { sym: 'CME', base: 228.10 }, { sym: 'SPGI', base: 498.20 }, { sym: 'MCO', base: 468.30 },
+            ]},
+            // Row 5 — Crypto & Alts (very faint, fast)
+            { speed: 0.55, fontSize: 9, alpha: 0.11, yPct: 0.95, symbols: [
+                { sym: 'BTC', base: 97450 }, { sym: 'ETH', base: 3280 }, { sym: 'SOL', base: 198.40 },
+                { sym: 'MSTR', base: 388.20 }, { sym: 'MARA', base: 24.60 }, { sym: 'RIOT', base: 12.80 },
+                { sym: 'CLSK', base: 18.40 }, { sym: 'GLD', base: 238.50 }, { sym: 'SLV', base: 28.20 },
+                { sym: 'EUR/USD', base: 1.0342 }, { sym: 'CL1', base: 72.85 }, { sym: 'VIX', base: 16.42 },
+            ]},
         ];
-        const tickerData = tickerSymbols.map(s => {
-            const change = (Math.random() - 0.45) * s.base * 0.02;
-            return {
-                sym: s.sym,
-                base: s.base,
-                price: s.base + change,
-                change: change,
-                changePct: (change / s.base) * 100,
-            };
+
+        // Build live data for each row
+        const tickerLayers = tickerRows.map(row => {
+            const data = row.symbols.map(s => {
+                const change = (Math.random() - 0.45) * s.base * 0.02;
+                return { sym: s.sym, base: s.base, price: s.base + change, change, changePct: (change / s.base) * 100 };
+            });
+            return { ...row, data, scrollX: Math.random() * -500 };
         });
+
         function tickTickerPrices() {
-            for (const d of tickerData) {
-                const drift = (d.base - d.price) * 0.002;
-                const shock = (Math.random() - 0.5) * d.base * 0.003;
-                d.price += drift + shock;
-                d.change = d.price - d.base;
-                d.changePct = (d.change / d.base) * 100;
+            for (const layer of tickerLayers) {
+                for (const d of layer.data) {
+                    const drift = (d.base - d.price) * 0.002;
+                    const shock = (Math.random() - 0.5) * d.base * 0.003;
+                    d.price += drift + shock;
+                    d.change = d.price - d.base;
+                    d.changePct = (d.change / d.base) * 100;
+                }
             }
         }
-        let tickerScrollX = 0;
 
         // --- Resize ---
         function resize() {
@@ -1634,7 +1656,7 @@
                     srLevels: [], // support/resistance
                     bars: [],     // OHLC bars with pixel-y values
                     scrollOffset: 0,
-                    label: ['SPX', 'IXIC', 'DJI'][ci],
+                    label: ['SPX', 'IXIC', 'FTMIB'][ci],
                 };
 
                 // Create some support/resistance levels
@@ -1768,7 +1790,7 @@
                 const fillColorBot = 'rgba(0, 0, 0, 0)';
                 const dashColor = 'rgba(192, 200, 212, 0.30)';
                 const priceBoxBg = 'rgba(192, 200, 212, 0.85)';
-                const priceBoxText = isPositive ? '#00cc6a' : '#000';
+                const priceBoxText = isPositive ? '#00cc6a' : 'rgba(192, 200, 212, 0.6)';
 
                 // --- Draw area fill under line ---
                 ctx.beginPath();
@@ -1792,7 +1814,7 @@
                 // --- Draw closing-price line ---
                 ctx.beginPath();
                 ctx.strokeStyle = lineColor;
-                ctx.lineWidth = 1.2;
+                ctx.lineWidth = 0.7;
                 for (let i = 0; i < visibleBars.length; i++) {
                     const x = tickX - (visibleBars.length - 1 - i) * BAR_STEP - slideOffset;
                     const y = chartTop + yData[i];
@@ -1814,16 +1836,12 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // Price box
+                // Price text (no background box)
                 const lastBar = visibleBars[lastIdx];
                 const priceText = lastBar.close.toFixed(2);
                 ctx.font = '11px monospace';
-                const tw = ctx.measureText(priceText).width;
-                const bx = tickX + 8;
-                ctx.fillStyle = priceBoxBg;
-                ctx.fillRect(bx, curY - 9, tw + 10, 18);
                 ctx.fillStyle = priceBoxText;
-                ctx.fillText(priceText, bx + 5, curY + 4);
+                ctx.fillText(priceText, tickX + 8, curY + 4);
 
                 // Chart label
                 ctx.font = '600 11px monospace';
@@ -1838,43 +1856,40 @@
                 ctx.fillText(`${pctSign}${changePct.toFixed(2)}%`, 12 + ctx.measureText(chart.label).width + 8, chartTop + 20);
             }
 
-            // --- Draw ticker symbols as scrolling silver text ---
-            tickerScrollX -= 0.4; // slow continuous scroll
-            ctx.font = '11px monospace';
-            const itemWidth = 160; // approx width per ticker item
-            const totalTickerWidth = tickerData.length * itemWidth;
-            // Wrap scroll
-            if (tickerScrollX < -totalTickerWidth) tickerScrollX += totalTickerWidth;
+            // --- Draw multi-layer staggered ticker rows ---
+            for (const layer of tickerLayers) {
+                layer.scrollX -= layer.speed;
+                ctx.font = `${layer.fontSize}px monospace`;
+                const itemW = 155;
+                const totalW = layer.data.length * itemW;
+                if (layer.scrollX < -totalW) layer.scrollX += totalW;
+                const rowY = h * layer.yPct;
+                const a = layer.alpha;
 
-            // Draw two rows: top and bottom of hero
-            const rows = [h * 0.06, h * 0.94];
-            for (const rowY of rows) {
-                // Draw two copies for seamless scroll
                 for (let copy = 0; copy < 2; copy++) {
-                    const baseX = tickerScrollX + copy * totalTickerWidth;
-                    for (let i = 0; i < tickerData.length; i++) {
-                        const d = tickerData[i];
-                        const x = baseX + i * itemWidth;
-                        // Skip if off-screen
-                        if (x > w + itemWidth || x < -itemWidth) continue;
+                    const bx = layer.scrollX + copy * totalW;
+                    for (let i = 0; i < layer.data.length; i++) {
+                        const d = layer.data[i];
+                        const x = bx + i * itemW;
+                        if (x > w + itemW || x < -itemW) continue;
 
-                        const decimals = d.sym === 'BTC' ? 0 : d.sym === 'EUR/USD' ? 4 : d.base > 1000 ? 0 : 2;
+                        const dec = d.sym === 'BTC' ? 0 : d.sym === 'EUR/USD' ? 4 : d.base > 1000 ? 0 : 2;
                         const isUp = d.change >= 0;
-                        const pSign = isUp ? '+' : '';
 
                         // Symbol
-                        ctx.fillStyle = 'rgba(192, 200, 212, 0.25)';
+                        ctx.fillStyle = `rgba(192, 200, 212, ${a})`;
                         ctx.fillText(d.sym, x, rowY);
+                        const sw = ctx.measureText(d.sym).width;
 
                         // Price
-                        const symW = ctx.measureText(d.sym).width;
-                        ctx.fillStyle = 'rgba(192, 200, 212, 0.20)';
-                        ctx.fillText(d.price.toFixed(decimals), x + symW + 6, rowY);
+                        ctx.fillStyle = `rgba(192, 200, 212, ${a * 0.8})`;
+                        ctx.fillText(d.price.toFixed(dec), x + sw + 5, rowY);
+                        const pw = ctx.measureText(d.price.toFixed(dec)).width;
 
                         // Change %
-                        const priceW = ctx.measureText(d.price.toFixed(decimals)).width;
-                        ctx.fillStyle = isUp ? 'rgba(0, 204, 106, 0.30)' : 'rgba(192, 200, 212, 0.18)';
-                        ctx.fillText(`${pSign}${d.changePct.toFixed(2)}%`, x + symW + priceW + 12, rowY);
+                        const sign = isUp ? '+' : '';
+                        ctx.fillStyle = isUp ? `rgba(0, 204, 106, ${a * 1.2})` : `rgba(192, 200, 212, ${a * 0.7})`;
+                        ctx.fillText(`${sign}${d.changePct.toFixed(2)}%`, x + sw + pw + 10, rowY);
                     }
                 }
             }
