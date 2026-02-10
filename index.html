@@ -1563,17 +1563,95 @@
             return { ...row, data, scrollX: Math.random() * -500 };
         });
 
+        // --- Yahoo Finance symbol mapping ---
+        const YAHOO_MAP = {
+            'SPX': '^GSPC', 'IXIC': '^IXIC', 'FTMIB': 'FTSEMIB.MI',
+            'BTC': 'BTC-USD', 'ETH': 'ETH-USD', 'SOL': 'SOL-USD',
+            'EUR/USD': 'EURUSD=X', 'CL1': 'CL=F', 'VIX': '^VIX',
+            'GLD': 'GLD', 'SLV': 'SLV',
+        };
+        const REVERSE_YAHOO = {};
+        for (const [k, v] of Object.entries(YAHOO_MAP)) REVERSE_YAHOO[v] = k;
+
+        function toYahoo(sym) { return YAHOO_MAP[sym] || sym; }
+        function fromYahoo(sym) { return REVERSE_YAHOO[sym] || sym; }
+
+        // Cloudflare Worker URL — replace after deploying
+        const WORKER_URL = 'https://delicate-fog-69cb.hwdjnyyyxq.workers.dev';
+        let liveMode = false; // true once first fetch succeeds
+
+        // Collect all unique display symbols
+        function getAllSymbols() {
+            const syms = new Set(['SPX', 'IXIC', 'FTMIB']);
+            for (const layer of tickerLayers) {
+                for (const d of layer.data) syms.add(d.sym);
+            }
+            return [...syms];
+        }
+
+        // Fetch real prices from Worker proxy
+        async function fetchRealPrices() {
+            if (!WORKER_URL || WORKER_URL.includes('YOUR_WORKER')) return; // not configured yet
+            try {
+                const allSyms = getAllSymbols();
+                const yahooSyms = allSyms.map(toYahoo).join(',');
+                const res = await fetch(`${WORKER_URL}?symbols=${encodeURIComponent(yahooSyms)}`);
+                if (!res.ok) return;
+                const json = await res.json();
+                if (!json.quotes || !json.quotes.length) return;
+
+                // Build lookup: display symbol → quote
+                const lookup = {};
+                for (const q of json.quotes) {
+                    lookup[fromYahoo(q.symbol)] = q;
+                }
+
+                // Update ticker layers
+                for (const layer of tickerLayers) {
+                    for (const d of layer.data) {
+                        const q = lookup[d.sym];
+                        if (q && q.price != null) {
+                            d.base = q.prevClose || q.price;
+                            d.price = q.price;
+                            d.realPrice = q.price; // anchor for micro-jitter
+                            d.change = q.change || 0;
+                            d.changePct = q.changePct || 0;
+                        }
+                    }
+                }
+
+                liveMode = true;
+                console.log(`[ticker] Fetched ${json.quotes.length} real quotes`);
+            } catch (e) {
+                console.warn('[ticker] Fetch failed, using simulated data', e);
+            }
+        }
+
+        // Micro-jitter between fetches (tiny random noise around real price)
         function tickTickerPrices() {
             for (const layer of tickerLayers) {
                 for (const d of layer.data) {
-                    const drift = (d.base - d.price) * 0.002;
-                    const shock = (Math.random() - 0.5) * d.base * 0.003;
-                    d.price += drift + shock;
-                    d.change = d.price - d.base;
-                    d.changePct = (d.change / d.base) * 100;
+                    if (liveMode && d.realPrice != null) {
+                        // Tiny jitter around the real price so display feels alive
+                        const jitter = (Math.random() - 0.5) * d.realPrice * 0.0002;
+                        d.price = d.realPrice + jitter;
+                        d.change = d.price - d.base;
+                        d.changePct = (d.change / d.base) * 100;
+                    } else {
+                        // Fallback: simulated random walk
+                        const drift = (d.base - d.price) * 0.002;
+                        const shock = (Math.random() - 0.5) * d.base * 0.003;
+                        d.price += drift + shock;
+                        d.change = d.price - d.base;
+                        d.changePct = (d.change / d.base) * 100;
+                    }
                 }
             }
         }
+
+        // Fetch on load, then every 60s
+        fetchRealPrices();
+        setInterval(fetchRealPrices, 60000);
 
         // --- Resize ---
         function resize() {
