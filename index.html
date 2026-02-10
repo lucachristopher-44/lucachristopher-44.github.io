@@ -1910,9 +1910,11 @@
             }
 
             // Draw each chart (overlapping, no separators)
+            // Wait for real data before showing chart lines (fallback after 3s)
+            const chartsReady = liveMode || performance.now() > 3000;
             for (const chart of charts) {
                 const bars = chart.bars;
-                if (bars.length < 2) continue;
+                if (bars.length < 2 || !chartsReady) continue;
 
                 // For real chart data, use dynamic bar step to fill width; for simulated, use fixed BAR_STEP
                 const isReal = !!chart.realChartData;
