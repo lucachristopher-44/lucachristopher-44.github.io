@@ -1620,6 +1620,17 @@
                     }
                 }
 
+                // Update chart labels with real index prices
+                for (const chart of charts) {
+                    const q = lookup[chart.label];
+                    if (q && q.price != null) {
+                        chart.realPrice = q.price;
+                        chart.realPrevClose = q.prevClose || q.price;
+                        chart.realChange = q.change || 0;
+                        chart.realChangePct = q.changePct || 0;
+                    }
+                }
+
                 liveMode = true;
                 console.log(`[ticker] Fetched ${json.quotes.length} real quotes`);
             } catch (e) {
@@ -1858,9 +1869,10 @@
                 // X position: rightmost bar at tickX, scrolling left by scrollAnim
                 const slideOffset = scrollAnim * BAR_STEP;
 
-                // Determine if current price is up from open (for number color only)
-                const currentClose = visibleBars[visibleBars.length - 1].close;
-                const isPositive = currentClose >= chart.openPrice;
+                // Determine if current price is up (use real data if available)
+                const isPositive = chart.realChangePct != null
+                    ? chart.realChangePct >= 0
+                    : visibleBars[visibleBars.length - 1].close >= chart.openPrice;
 
                 // All lines/fills are always silver
                 const lineColor = 'rgba(192, 200, 212, 0.50)';
@@ -1914,9 +1926,11 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // Price text (no background box)
+                // Price text — use real price if available, otherwise simulated
                 const lastBar = visibleBars[lastIdx];
-                const priceText = lastBar.close.toFixed(2);
+                const displayPrice = chart.realPrice != null ? chart.realPrice : lastBar.close;
+                const decimals = 2;
+                const priceText = displayPrice.toFixed(decimals);
                 ctx.font = '11px monospace';
                 ctx.fillStyle = priceBoxText;
                 ctx.fillText(priceText, tickX + 8, curY + 4);
@@ -1926,10 +1940,17 @@
                 ctx.fillStyle = 'rgba(192, 200, 212, 0.25)';
                 ctx.fillText(chart.label, 12, chartTop + 20);
 
-                // Change % — green if positive, silver if negative
-                const changePct = ((lastBar.close - chart.openPrice) / chart.openPrice * 100);
+                // Change % — use real data if available
+                let changePct, chgPositive;
+                if (chart.realChangePct != null) {
+                    changePct = chart.realChangePct;
+                    chgPositive = changePct >= 0;
+                } else {
+                    changePct = ((lastBar.close - chart.openPrice) / chart.openPrice * 100);
+                    chgPositive = changePct >= 0;
+                }
                 const pctSign = changePct >= 0 ? '+' : '';
-                ctx.fillStyle = isPositive ? 'rgba(0, 204, 106, 0.45)' : 'rgba(192, 200, 212, 0.3)';
+                ctx.fillStyle = chgPositive ? 'rgba(0, 204, 106, 0.45)' : 'rgba(192, 200, 212, 0.3)';
                 ctx.font = '10px monospace';
                 ctx.fillText(`${pctSign}${changePct.toFixed(2)}%`, 12 + ctx.measureText(chart.label).width + 8, chartTop + 20);
             }
