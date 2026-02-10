@@ -169,6 +169,17 @@
             z-index: 2;
         }
 
+        .market-status {
+            position: absolute;
+            top: 80px;
+            right: 24px;
+            font: 10px monospace;
+            color: rgba(192, 200, 212, 0.3);
+            letter-spacing: 1px;
+            z-index: 4;
+            pointer-events: none;
+        }
+
         .hero::before {
             display: none;
         }
@@ -1120,6 +1131,7 @@
     <!-- Hero -->
     <section class="hero" id="hero">
         <canvas id="particleCanvas"></canvas>
+        <div id="marketStatus" class="market-status"></div>
         <div class="hero-content">
             <h1>LUCA POZZI</h1>
             <div class="divider"></div>
@@ -1589,65 +1601,100 @@
             return [...syms];
         }
 
-        // Fetch real prices from Worker proxy
+        // Check if US stock market is currently open (NYSE: Mon–Fri 9:30–16:00 ET)
+        function isMarketOpen() {
+            const now = new Date();
+            const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+            const day = et.getDay(); // 0=Sun, 6=Sat
+            if (day === 0 || day === 6) return false;
+            const mins = et.getHours() * 60 + et.getMinutes();
+            return mins >= 570 && mins < 960; // 9:30=570, 16:00=960
+        }
+
+        // Fetch real prices + chart data from Worker proxy
         async function fetchRealPrices() {
-            if (!WORKER_URL || WORKER_URL.includes('YOUR_WORKER')) return; // not configured yet
+            if (!WORKER_URL || WORKER_URL.includes('YOUR_WORKER')) return;
             try {
                 const allSyms = getAllSymbols();
                 const yahooSyms = allSyms.map(toYahoo).join(',');
-                const res = await fetch(`${WORKER_URL}?symbols=${encodeURIComponent(yahooSyms)}`);
-                if (!res.ok) return;
-                const json = await res.json();
-                if (!json.quotes || !json.quotes.length) return;
+                const chartSyms = ['SPX', 'IXIC', 'FTMIB'].map(toYahoo).join(',');
 
-                // Build lookup: display symbol → quote
-                const lookup = {};
-                for (const q of json.quotes) {
-                    lookup[fromYahoo(q.symbol)] = q;
-                }
+                // Two separate requests so the large quote fetch doesn't starve the chart fetch
+                const [quotesRes, chartsRes] = await Promise.all([
+                    fetch(`${WORKER_URL}?symbols=${encodeURIComponent(yahooSyms)}`),
+                    fetch(`${WORKER_URL}?charts=${encodeURIComponent(chartSyms)}`)
+                ]);
 
-                // Update ticker layers
-                for (const layer of tickerLayers) {
-                    for (const d of layer.data) {
-                        const q = lookup[d.sym];
-                        if (q && q.price != null) {
-                            d.base = q.prevClose || q.price;
-                            d.price = q.price;
-                            d.realPrice = q.price; // anchor for micro-jitter
-                            d.change = q.change || 0;
-                            d.changePct = q.changePct || 0;
+                // --- Process quotes ---
+                if (quotesRes.ok) {
+                    const qJson = await quotesRes.json();
+                    if (qJson.quotes && qJson.quotes.length) {
+                        const lookup = {};
+                        for (const q of qJson.quotes) lookup[fromYahoo(q.symbol)] = q;
+
+                        for (const layer of tickerLayers) {
+                            for (const d of layer.data) {
+                                const q = lookup[d.sym];
+                                if (q && q.price != null) {
+                                    d.base = q.prevClose || q.price;
+                                    d.price = q.price;
+                                    d.realPrice = q.price;
+                                    d.change = q.change || 0;
+                                    d.changePct = q.changePct || 0;
+                                }
+                            }
+                        }
+
+                        for (const chart of charts) {
+                            const q = lookup[chart.label];
+                            if (q && q.price != null) {
+                                chart.realPrice = q.price;
+                                chart.realPrevClose = q.prevClose || q.price;
+                                chart.realChange = q.change || 0;
+                                chart.realChangePct = q.changePct || 0;
+                            }
                         }
                     }
                 }
 
-                // Update chart labels with real index prices
-                for (const chart of charts) {
-                    const q = lookup[chart.label];
-                    if (q && q.price != null) {
-                        chart.realPrice = q.price;
-                        chart.realPrevClose = q.prevClose || q.price;
-                        chart.realChange = q.change || 0;
-                        chart.realChangePct = q.changePct || 0;
+                // --- Process chart intraday data ---
+                if (chartsRes.ok) {
+                    const cJson = await chartsRes.json();
+                    if (cJson.charts && cJson.charts.length) {
+                        for (const cd of cJson.charts) {
+                            const displaySym = fromYahoo(cd.symbol);
+                            const chart = charts.find(c => c.label === displaySym);
+                            if (!chart || !cd.closes || cd.closes.length < 2) continue;
+
+                            const realBars = cd.closes.map(c => ({
+                                open: c, high: c, low: c, close: c, isUp: true
+                            }));
+                            chart.bars = realBars;
+                            chart.openPrice = cd.prevClose || cd.closes[0];
+                            chart.realChartData = true;
+                        }
                     }
+                    console.log(`[ticker] Charts: ${cJson.charts?.length || 0} loaded`);
                 }
 
                 liveMode = true;
-                console.log(`[ticker] Fetched ${json.quotes.length} real quotes`);
+                for (const c of charts) {
+                    console.log(`[ticker] ${c.label}: realChartData=${!!c.realChartData}, bars=${c.bars.length}, realPrice=${c.realPrice}`);
+                }
             } catch (e) {
                 console.warn('[ticker] Fetch failed, using simulated data', e);
             }
         }
 
-        // Micro-jitter between fetches (tiny random noise around real price)
+        // Update ticker prices — exact real price when live, simulated fallback otherwise
         function tickTickerPrices() {
             for (const layer of tickerLayers) {
                 for (const d of layer.data) {
                     if (liveMode && d.realPrice != null) {
-                        // Tiny jitter around the real price so display feels alive
-                        const jitter = (Math.random() - 0.5) * d.realPrice * 0.0002;
-                        d.price = d.realPrice + jitter;
-                        d.change = d.price - d.base;
-                        d.changePct = (d.change / d.base) * 100;
+                        // Show exact real price — no jitter
+                        d.price = d.realPrice;
+                        d.change = d.realPrice - d.base;
+                        d.changePct = d.base ? (d.change / d.base) * 100 : 0;
                     } else {
                         // Fallback: simulated random walk
                         const drift = (d.base - d.price) * 0.002;
@@ -1663,6 +1710,14 @@
         // Fetch on load, then every 60s
         fetchRealPrices();
         setInterval(fetchRealPrices, 60000);
+
+        // Market status overlay
+        const marketStatusEl = document.getElementById('marketStatus');
+        function updateMarketStatus() {
+            marketStatusEl.textContent = isMarketOpen() ? '' : 'MARKET CLOSED';
+        }
+        updateMarketStatus();
+        setInterval(updateMarketStatus, 30000);
 
         // --- Resize ---
         function resize() {
@@ -1771,6 +1826,8 @@
         // --- Tick: add a new candle to each chart (called on interval) ---
         function tickAllCharts() {
             for (const chart of charts) {
+                // Once we have real data (liveMode), freeze chart lines completely
+                if (liveMode || chart.realChartData) continue;
                 const candle = nextPrice(chart);
                 chart.bars.push(candle);
                 // Trim old bars to keep memory bounded
@@ -1857,17 +1914,22 @@
                 const bars = chart.bars;
                 if (bars.length < 2) continue;
 
+                // For real chart data, use dynamic bar step to fill width; for simulated, use fixed BAR_STEP
+                const isReal = !!chart.realChartData;
+                const effectiveBarStep = isReal ? Math.max(1, tickX / (bars.length - 1)) : BAR_STEP;
+
                 // Determine visible bar range
-                const visibleCount = Math.floor(tickX / BAR_STEP) + 1;
-                const startIdx = Math.max(0, bars.length - visibleCount);
-                const visibleBars = bars.slice(startIdx);
+                const visibleCount = Math.floor(tickX / effectiveBarStep) + 1;
+                const startIdx = isReal ? 0 : Math.max(0, bars.length - visibleCount);
+                const visibleBars = isReal ? bars : bars.slice(startIdx);
 
                 // Rolling local auto-scale so every section fills the vertical space
                 const yData = computeRollingScale(visibleBars, chart.chartH, chart.baseVol);
                 const chartTop = chart.centerY - chart.chartH * 0.5;
 
                 // X position: rightmost bar at tickX, scrolling left by scrollAnim
-                const slideOffset = scrollAnim * BAR_STEP;
+                // Once live data is active, all chart lines are static (no scrolling)
+                const slideOffset = (isReal || liveMode) ? 0 : scrollAnim * BAR_STEP;
 
                 // Determine if current price is up (use real data if available)
                 const isPositive = chart.realChangePct != null
@@ -1885,12 +1947,12 @@
                 // --- Draw area fill under line ---
                 ctx.beginPath();
                 for (let i = 0; i < visibleBars.length; i++) {
-                    const x = tickX - (visibleBars.length - 1 - i) * BAR_STEP - slideOffset;
+                    const x = tickX - (visibleBars.length - 1 - i) * effectiveBarStep - slideOffset;
                     const y = chartTop + yData[i];
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 const lastDrawX = tickX - slideOffset;
-                const firstDrawX = tickX - (visibleBars.length - 1) * BAR_STEP - slideOffset;
+                const firstDrawX = tickX - (visibleBars.length - 1) * effectiveBarStep - slideOffset;
                 const bottomY = chartTop + chart.chartH;
                 ctx.lineTo(lastDrawX, bottomY);
                 ctx.lineTo(firstDrawX, bottomY);
@@ -1906,7 +1968,7 @@
                 ctx.strokeStyle = lineColor;
                 ctx.lineWidth = 0.7;
                 for (let i = 0; i < visibleBars.length; i++) {
-                    const x = tickX - (visibleBars.length - 1 - i) * BAR_STEP - slideOffset;
+                    const x = tickX - (visibleBars.length - 1 - i) * effectiveBarStep - slideOffset;
                     const y = chartTop + yData[i];
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
@@ -1992,6 +2054,8 @@
                     }
                 }
             }
+
+            // (market status drawn via HTML overlay)
 
             requestAnimationFrame(draw);
         }
