@@ -678,6 +678,117 @@
             color: var(--gold);
         }
 
+        /* Portfolio */
+        #portfolio {
+            background: var(--cream);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .portfolio-card {
+            background: var(--white);
+            border: 1px solid var(--light-gray);
+            padding: 1.8rem;
+            position: relative;
+            transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo), border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .portfolio-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s var(--ease-out-expo);
+        }
+
+        .portfolio-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .portfolio-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            border-color: rgba(192, 200, 212, 0.4);
+        }
+
+        .portfolio-card-tag {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.7rem;
+            color: var(--gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .portfolio-card h3 {
+            font-size: 1.05rem;
+            color: var(--navy);
+            margin-bottom: 0.6rem;
+            line-height: 1.4;
+        }
+
+        .portfolio-card p {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.88rem;
+            color: var(--gray);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .portfolio-card-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 1rem;
+        }
+
+        .portfolio-card-skills span {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.72rem;
+            color: var(--navy);
+            background: var(--cream);
+            padding: 0.25rem 0.6rem;
+            letter-spacing: 0.3px;
+            border-left: 2px solid var(--cyan);
+        }
+
+        .portfolio-card.has-file {
+            cursor: pointer;
+        }
+
+        .portfolio-card.has-file .portfolio-card-tag::after {
+            content: ' ↗';
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .portfolio-card.has-file:hover .portfolio-card-tag::after {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .portfolio-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         /* Blog */
         .blog-grid {
             display: grid;
@@ -1122,6 +1233,7 @@
             <ul>
                 <li><a href="#about">About</a></li>
                 <li><a href="#resume">Resume</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
                 <li><a href="#blog">Blog</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
@@ -1135,7 +1247,7 @@
         <div class="hero-content">
             <h1>LUCA POZZI</h1>
             <div class="divider"></div>
-            <p>Finance/tech student with top-ranked retail sales performance and experience driving outbound growth, client acquisition, and revenue expansion.</p>
+            <p>Finance &amp; fintech student with experience in investor relations, portfolio analysis, and financial modeling across internships, competitions, and independent projects.</p>
             <a href="#contact" class="cta-btn">LET'S CONNECT</a>
         </div>
     </section>
@@ -1150,8 +1262,8 @@
             <div class="about-top reveal">
                 <img src="Headshot.jpg?v=2" alt="Luca Pozzi" class="headshot">
                 <div class="about-text">
-                    <p>I'm a finance and fintech student at Fordham University's Gabelli School of Business with a track record of top-ranked sales performance and hands-on experience in outbound growth, client acquisition, and revenue expansion.</p>
-                    <p>My experience spans sales at Equinox and Pietra Communications, customer relations at the United States-Mexico Chamber of Commerce, and hospitality at Aquarelle. I'm also an active board member of the Fintech/VC Club, where I analyze fintech and VC-backed startups.</p>
+                    <p>I'm a finance and fintech student at Fordham University's Gabelli School of Business with hands-on experience in investor relations, financial modeling, and portfolio analysis through internships, case competitions, and independent projects.</p>
+                    <p>My experience spans investor-facing work at Pietra Communications and the United States-Mexico Chamber of Commerce, retail sales at Equinox, and board membership at the Fintech/VC Club where I author startup analyses and organize conferences.</p>
                     <p>I'm passionate about old movies and windsurfing, and I'm fluent in English and Italian with conversational Spanish and French.</p>
                 </div>
             </div>
@@ -1194,7 +1306,7 @@
                             <div class="timeline-date">Present</div>
                             <div class="timeline-title">B.S. Finance, Fintech Concentration</div>
                             <div class="timeline-org">Fordham University, Gabelli School of Business</div>
-                            <div class="timeline-desc">Dean's List 2024, 2025, 2026. Relevant coursework: Financial Modeling, Fintech, Venture Capital, Marketing, Data Systems.</div>
+                            <div class="timeline-desc">Dean's List 2024, 2025, 2026. Relevant coursework: Financial Modeling, Equity Research, Credit Analysis, Corporate Finance, Data Systems.</div>
                         </div>
                         <div class="timeline-item reveal">
                             <div class="timeline-date">Previously</div>
@@ -1204,19 +1316,19 @@
                     </div>
                 </div>
                 <div class="resume-section reveal">
-                    <h3>Sales Experience</h3>
+                    <h3>Internship Experience</h3>
                     <div class="timeline">
                         <div class="timeline-item reveal">
-                            <div class="timeline-date">June 2023 &mdash; June 2024</div>
-                            <div class="timeline-title">Sales Associate</div>
-                            <div class="timeline-org">Equinox &mdash; New York, NY</div>
-                            <div class="timeline-desc">Generated <span class="stat-value" data-target="60" data-prefix="$" data-suffix="K+">0</span> in sales, consistently ranking as top salesperson in the district. Cold-called and churned prospective members, designed targeted in-class promotions, and created a direct-order service opening a new revenue channel.</div>
+                            <div class="timeline-date">Sept. 2023 &mdash; Sept. 2025</div>
+                            <div class="timeline-title">Associate</div>
+                            <div class="timeline-org">Pietra Communications &mdash; New York, NY</div>
+                            <div class="timeline-desc">Ran portfolio segmentation analysis, identifying a <span class="stat-value" data-target="27" data-suffix="%">0</span> revenue growth opportunity in target segments. Coordinated investor-facing events, tracking attendance and conversion to measure pipeline impact. Managed <span class="stat-value" data-target="80" data-prefix="$" data-suffix="K+">0</span> operating budget with monthly variance analysis. Synthesized market data and competitive research into executive decks.</div>
                         </div>
                         <div class="timeline-item reveal">
-                            <div class="timeline-date">Sept. 2023 &mdash; Sept. 2025</div>
-                            <div class="timeline-title">Sales Associate</div>
-                            <div class="timeline-org">Pietra Communications &mdash; New York, NY</div>
-                            <div class="timeline-desc">Built and managed a prospect database that increased new client acquisition by <span class="stat-value" data-target="27" data-suffix="%">0</span>. Created an automated personalization tool for tailored emails and pitched and scoped <span class="stat-value" data-target="90" data-prefix="$" data-suffix="K+">0</span> targeted campaigns to prospects.</div>
+                            <div class="timeline-date">July 2023 &mdash; Aug. 2023</div>
+                            <div class="timeline-title">Investor Relations</div>
+                            <div class="timeline-org">United States-Mexico Chamber of Commerce &mdash; New York, NY</div>
+                            <div class="timeline-desc">Supported investor relations at cross-border events with 50+ corporate leaders; satisfaction up <span class="stat-value" data-target="22" data-suffix="%">0</span>. Streamlined investor onboarding workflows, cutting processing time <span class="stat-value" data-target="38" data-suffix="%">0</span> and boosting engagement 17%. Compiled post-event ROI reports generating 3 new institutional partnerships.</div>
                         </div>
                     </div>
                 </div>
@@ -1225,30 +1337,28 @@
             <div style="margin-top: 3rem;">
                 <div class="resume-sections">
                     <div class="resume-section reveal">
-                        <h3>Other Experience</h3>
+                        <h3>Other Work Experience</h3>
                         <div class="timeline">
                             <div class="timeline-item reveal">
-                                <div class="timeline-date">July 2023 &mdash; Sept. 2023</div>
-                                <div class="timeline-title">Customer Relations</div>
-                                <div class="timeline-org">United States-Mexico Chamber of Commerce &mdash; New York, NY</div>
-                                <div class="timeline-desc">Improved NPS results <span class="stat-value" data-target="22" data-suffix="%">0</span> compared to previous quarters. Engaged senior corporate attendees to surface partnership and sponsorship opportunities, and produced post-event follow-ups generating dozens of qualified leads.</div>
-                            </div>
-                            <div class="timeline-item reveal">
-                                <div class="timeline-date">June 2025 &mdash; Sept. 2025</div>
-                                <div class="timeline-title">Bartender</div>
-                                <div class="timeline-org">Aquarelle &mdash; New York, NY</div>
-                                <div class="timeline-desc">Served <span class="stat-value" data-target="200" data-suffix="+">0</span> nightly guests in a high-volume setting. Maintained the highest average ticket cost among servers by upselling menu offerings, and collaborated with hosts and promoters to plan private events for <span class="stat-value" data-target="50" data-suffix="+">0</span> guests.</div>
+                                <div class="timeline-date">Sept. 2023 &mdash; June 2024</div>
+                                <div class="timeline-title">Retail Associate</div>
+                                <div class="timeline-org">Equinox &mdash; New York, NY</div>
+                                <div class="timeline-desc">Generated <span class="stat-value" data-target="60" data-prefix="$" data-suffix="K+">0</span> in revenue, ranking as top performer district-wide by targeting high-conversion categories. Launched direct-to-gym ordering service, opening an untapped revenue channel and driving new sales.</div>
                             </div>
                         </div>
                     </div>
                     <div class="resume-section reveal">
-                        <h3>Extracurricular</h3>
+                        <h3>Projects &amp; Competitions</h3>
                         <div class="timeline">
                             <div class="timeline-item reveal">
-                                <div class="timeline-date">Sept. 2023 &mdash; Present</div>
-                                <div class="timeline-title">Board Member</div>
-                                <div class="timeline-org">Fintech/VC Club &mdash; New York, NY</div>
-                                <div class="timeline-desc">Wrote analyses of fintech and VC-backed startups for weekly club meetings and the markets newsletter. Organized the One Shared Truth conference, moderating fireside chats and contacting guest speakers.</div>
+                                <div class="timeline-date">Nov. 2025</div>
+                                <div class="timeline-title">ABI Restructuring Case Competition</div>
+                                <div class="timeline-desc">Built creditor recovery waterfall with DIP financing, liquidation analysis, and exit scenarios. Presented restructuring proposal to bankruptcy professionals, pitching tailored exit facility terms.</div>
+                            </div>
+                            <div class="timeline-item reveal">
+                                <div class="timeline-date">Nov. 2025</div>
+                                <div class="timeline-title">Stock Pitch Competition</div>
+                                <div class="timeline-desc">Modeled upside case for Credo (CRDO) driven by hyperscaler capex and liquid cooling adoption. Pitched thesis with proprietary research evaluating TAM size and downside exposure.</div>
                             </div>
                         </div>
                     </div>
@@ -1258,14 +1368,75 @@
             <div style="margin-top: 3rem;" class="reveal">
                 <h3 style="font-size: 1.2rem; color: var(--navy); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--gold); display: inline-block;">Skills &amp; Certifications</h3>
                 <div class="skills-grid">
-                    <div class="skill-item reveal">Python (Automation, Data Scraping, APIs)</div>
-                    <div class="skill-item has-cert reveal" onclick="openCert('FP&amp;A Course Certificate - NASBA.pdf', 'Excel &amp; FP&amp;A Certificate')">Excel (Macros, Pivot Tables, KPI Dashboards)</div>
-                    <div class="skill-item has-cert reveal" onclick="openCert('Bloomberg Market Concepts.pdf', 'Bloomberg Market Concepts')">Bloomberg Market Concepts</div>
-                    <div class="skill-item has-cert reveal" onclick="openCert('FINRA SIE.pdf', 'FINRA SIE Certification')">Finra SIE Certification</div>
+                    <div class="skill-item reveal">Python (pandas, Data Analysis, Web Scraping)</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('FP&amp;A Course Certificate - NASBA.pdf', 'Excel &amp; FP&amp;A Certificate')">Excel (VBA, INDEX-MATCH, Scenario Analysis, Pivots)</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('FINRA SIE.pdf', 'FINRA SIE Certification')">FINRA SIE Certification</div>
                     <div class="skill-item has-cert reveal" onclick="openCert('Envestnet Certification.pdf', 'Envestnet Certification')">Envestnet Certification</div>
-                    <div class="skill-item has-cert reveal" onclick="openCert('Intermediate Python 2.pdf', 'Intermediate Python Certificate')">Intermediate Python Certificate</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('Bloomberg Market Concepts.pdf', 'Bloomberg Market Concepts')">Bloomberg Market Concepts</div>
+                    <div class="skill-item has-cert reveal" onclick="openCert('Intermediate Python 2.pdf', 'Advanced Python Certificate')">Advanced Python Certificate</div>
                     <div class="skill-item reveal">Financial Modeling</div>
-                    <div class="skill-item reveal">Venture Capital &amp; Fintech</div>
+                    <div class="skill-item reveal">Languages: EN &amp; IT (fluent), ES &amp; FR (conversational)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio -->
+    <section id="portfolio">
+        <div class="section-inner">
+            <div class="reveal-left">
+                <h2 class="section-title">Portfolio</h2>
+                <div class="section-line"></div>
+            </div>
+            <p class="portfolio-intro reveal" style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 0.95rem; color: var(--text); line-height: 1.8; margin-bottom: 2.5rem;">A selection of financial models, investment analyses, and competition work from my coursework and independent projects.</p>
+            <div class="portfolio-grid">
+                <div class="portfolio-card reveal-scale">
+                    <div class="portfolio-card-tag">Investment Memo</div>
+                    <h3>DCF &amp; Investment Memo &mdash; Lamb Weston (LW)</h3>
+                    <p>Full DCF valuation and investment memo with revenue build, WACC derivation, and sensitivity analysis on a consumer staples name.</p>
+                    <div class="portfolio-card-skills">
+                        <span>DCF</span><span>Valuation</span><span>Excel</span>
+                    </div>
+                </div>
+                <div class="portfolio-card has-file reveal-scale" onclick="openCert('Portfolio Analysis.pdf', 'In &amp; Out-of-Sample Portfolio Analysis')">
+                    <div class="portfolio-card-tag">Portfolio Analysis</div>
+                    <h3>In &amp; Out-of-Sample Portfolio Analysis</h3>
+                    <p>Constructed and back-tested optimized portfolios using mean-variance optimization, comparing in-sample vs. out-of-sample performance across market regimes.</p>
+                    <div class="portfolio-card-skills">
+                        <span>Python</span><span>pandas</span><span>Statistics</span>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal-scale">
+                    <div class="portfolio-card-tag">Financial Model</div>
+                    <h3>MSFT Pro-Forma Model</h3>
+                    <p>Three-statement pro-forma model for Microsoft with revenue segmentation, operating leverage assumptions, and scenario analysis on cloud growth.</p>
+                    <div class="portfolio-card-skills">
+                        <span>3-Statement</span><span>Pro-Forma</span><span>Excel</span>
+                    </div>
+                </div>
+                <div class="portfolio-card has-file reveal-scale" onclick="openCert('ABI Restructuring Case.pdf', 'ABI Restructuring Case')">
+                    <div class="portfolio-card-tag">Case Competition</div>
+                    <h3>ABI Restructuring Case</h3>
+                    <p>Built creditor recovery waterfall with DIP financing, liquidation analysis, and exit scenarios. Presented to bankruptcy professionals.</p>
+                    <div class="portfolio-card-skills">
+                        <span>Restructuring</span><span>Credit</span><span>Waterfall</span>
+                    </div>
+                </div>
+                <div class="portfolio-card has-file reveal-scale" onclick="openCert('Credo Thesis.pdf', 'Credo Technology (CRDO) — Long Thesis')">
+                    <div class="portfolio-card-tag">Stock Pitch</div>
+                    <h3>Credo Technology (CRDO) &mdash; Long Thesis</h3>
+                    <p>Modeled upside driven by hyperscaler capex and liquid cooling adoption. Proprietary TAM sizing with downside exposure analysis.</p>
+                    <div class="portfolio-card-skills">
+                        <span>Equity Research</span><span>Modeling</span><span>Pitch</span>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal-scale">
+                    <div class="portfolio-card-tag">Website</div>
+                    <h3>This Website</h3>
+                    <p>Built from scratch with vanilla HTML, CSS, and JavaScript. Features a real-time Bloomberg-style market ticker powered by a Cloudflare Worker proxy to Yahoo Finance.</p>
+                    <div class="portfolio-card-skills">
+                        <span>HTML/CSS/JS</span><span>Canvas API</span><span>Cloudflare</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1501,7 +1672,7 @@
     <footer>
         <div class="social-links">
             <a href="https://www.linkedin.com/in/4-lucapozzi/" target="_blank">LinkedIn</a>
-            <a href="Luca Pozzi Resume.pdf" download>Resume ↓</a>
+            <a href="LP Resume.pdf" download>Resume ↓</a>
         </div>
         <p>&copy; 2026 Luca Pozzi. All rights reserved.</p>
     </footer>
