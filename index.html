@@ -789,95 +789,6 @@
             }
         }
 
-        /* Blog */
-        .blog-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .blog-card {
-            background: var(--white);
-            border: 1px solid var(--light-gray);
-            transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo), border-color 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .blog-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gold);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.5s var(--ease-out-expo);
-        }
-
-        .blog-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .blog-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-            border-color: rgba(192, 200, 212, 0.4);
-        }
-
-        .blog-card-header {
-            padding: 1.5rem 1.5rem 0;
-        }
-
-        .blog-tag {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-size: 0.7rem;
-            color: var(--gold);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        .blog-card h3 {
-            font-size: 1.1rem;
-            color: var(--navy);
-            margin: 0.5rem 0;
-            line-height: 1.4;
-        }
-
-        .blog-card-body {
-            padding: 0 1.5rem 1.5rem;
-        }
-
-        .blog-card p {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-size: 0.88rem;
-            color: var(--gray);
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .blog-date {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-size: 0.8rem;
-            color: var(--gray);
-        }
-
-        .read-more {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-size: 0.85rem;
-            color: var(--gold);
-            text-decoration: none;
-            letter-spacing: 0.5px;
-            transition: color 0.3s, letter-spacing 0.3s;
-        }
-
-        .read-more:hover {
-            color: var(--navy);
-            letter-spacing: 1.5px;
-        }
-
         /* Contact */
         #contact {
             background: var(--white);
@@ -1035,108 +946,6 @@
             transform: translateY(-3px) scale(1.05);
         }
 
-        /* Article Modal */
-        .article-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(7, 13, 24, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 9999;
-            overflow-y: auto;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .article-modal.active {
-            display: block;
-            opacity: 1;
-        }
-
-        .article-modal-inner {
-            max-width: 720px;
-            margin: 4rem auto;
-            background: var(--white);
-            padding: 3rem;
-            position: relative;
-            animation: modalSlideIn 0.4s var(--ease-out-expo);
-        }
-
-        @keyframes modalSlideIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .article-modal-close {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--gray);
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.3s, transform 0.3s;
-        }
-
-        .article-modal-close:hover {
-            color: var(--navy);
-            transform: scale(1.15);
-        }
-
-        .article-modal .blog-tag {
-            margin-bottom: 0.5rem;
-            display: inline-block;
-        }
-
-        .article-modal h2 {
-            font-size: 1.8rem;
-            color: var(--navy);
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
-        }
-
-        .article-modal .article-date {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-size: 0.8rem;
-            color: var(--gray);
-            margin-bottom: 2rem;
-            display: block;
-        }
-
-        .article-modal .article-body p {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            font-size: 0.95rem;
-            color: var(--text);
-            line-height: 1.9;
-            margin-bottom: 1.2rem;
-        }
-
-        .article-modal .article-body h3 {
-            font-size: 1.15rem;
-            color: var(--navy);
-            margin: 2rem 0 0.8rem;
-        }
-
-        @media (max-width: 768px) {
-            .article-modal-inner {
-                margin: 1rem;
-                padding: 2rem 1.5rem;
-            }
-            .article-modal h2 {
-                font-size: 1.4rem;
-            }
-        }
-
         /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
@@ -1205,7 +1014,6 @@
 
             .about-content,
             .resume-sections,
-            .blog-grid,
             .contact-content {
                 grid-template-columns: 1fr;
             }
@@ -1234,7 +1042,6 @@
                 <li><a href="#about">About</a></li>
                 <li><a href="#resume">Resume</a></li>
                 <li><a href="#portfolio">Portfolio</a></li>
-                <li><a href="#blog">Blog</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </div>
@@ -1442,70 +1249,6 @@
         </div>
     </section>
 
-    <!-- Blog -->
-    <section id="blog">
-        <div class="section-inner">
-            <div class="reveal-left">
-                <h2 class="section-title">Blog</h2>
-                <div class="section-line"></div>
-            </div>
-            <div class="blog-grid">
-                <div class="blog-card reveal-scale" onclick="openArticle('fed-chair')" style="cursor:pointer;">
-                    <div class="blog-card-header">
-                        <span class="blog-tag">Macro</span>
-                        <h3>What the Next Fed Chair Means for Gold, Silver, and Crypto</h3>
-                    </div>
-                    <div class="blog-card-body">
-                        <p>The Fed chair sets the tone for monetary policy, and that tone ripples directly into hard assets and digital currencies. Here's what to watch.</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="blog-date">February 2026</span>
-                            <span class="read-more">Read More &rarr;</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="blog-card reveal-scale" onclick="openArticle('ai-finance')" style="cursor:pointer;">
-                    <div class="blog-card-header">
-                        <span class="blog-tag">Fintech</span>
-                        <h3>How AI Is Transforming Financial Analysis</h3>
-                    </div>
-                    <div class="blog-card-body">
-                        <p>A look at how machine learning and AI tools are changing the way analysts approach equity research, risk management, and portfolio optimization.</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="blog-date">January 2026</span>
-                            <span class="read-more">Read More &rarr;</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="blog-card reveal-scale" onclick="openArticle('private-credit')" style="cursor:pointer;">
-                    <div class="blog-card-header">
-                        <span class="blog-tag">Credit</span>
-                        <h3>Will Private Credit Go Public?</h3>
-                    </div>
-                    <div class="blog-card-body">
-                        <p>Private credit has ballooned into a $1.7 trillion market. As retail access expands and regulators circle, the asset class faces an identity crisis.</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="blog-date">December 2025</span>
-                            <span class="read-more">Read More &rarr;</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="blog-card reveal-scale" onclick="openArticle('saas')" style="cursor:pointer;">
-                    <div class="blog-card-header">
-                        <span class="blog-tag">Tech</span>
-                        <h3>Why SaaS Isn't Dead Yet</h3>
-                    </div>
-                    <div class="blog-card-body">
-                        <p>Everyone loves declaring SaaS dead. But recurring revenue, sticky products, and AI integration tell a different story for the business model that built modern tech.</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="blog-date">November 2025</span>
-                            <span class="read-more">Read More &rarr;</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Contact -->
     <section id="contact">
         <div class="section-inner">
@@ -1541,121 +1284,6 @@
             </div>
         </div>
     </section>
-
-    <!-- Article Modals -->
-    <div class="article-modal" id="article-fed-chair">
-        <div class="article-modal-inner">
-            <button class="article-modal-close" onclick="closeArticle()">&times;</button>
-            <span class="blog-tag">Macro</span>
-            <h2>What the Next Fed Chair Means for Gold, Silver, and Crypto</h2>
-            <span class="article-date">February 2026</span>
-            <div class="article-body">
-                <p>Every four years, markets hold their breath over the same question: who will lead the Federal Reserve? It's not just a policy appointment. The person sitting in that chair shapes the cost of capital across the global economy, and for alternative assets like precious metals and crypto, the implications are enormous.</p>
-
-                <h3>Why the Chair Matters More Than You Think</h3>
-                <p>The Fed chair doesn't just set interest rates. They set the narrative. A hawkish chair signals tighter money, higher real yields, and a stronger dollar. A dovish one implies the opposite. And it's that narrative, often more than the actual policy, that moves markets in the short term.</p>
-                <p>Gold and silver are classically inverse to real yields. When the Fed holds rates high and inflation cools, the opportunity cost of holding non-yielding metals goes up. But when markets sense a pivot or a softer policy regime, metals rally hard. We saw this in late 2023 and again in early 2025, both times when forward guidance shifted before rates actually moved.</p>
-
-                <h3>The Precious Metals Angle</h3>
-                <p>Gold has historically outperformed during periods of policy uncertainty. The transition between Fed chairs is exactly that kind of moment. Investors don't know what the playbook will be, so they hedge. Central bank demand, already at multi-decade highs, tends to accelerate during leadership transitions as sovereign buyers front-run potential regime shifts.</p>
-                <p>Silver adds a layer of complexity. It's both a monetary metal and an industrial one. A chair who prioritizes full employment and tolerates slightly higher inflation could be a dual tailwind: looser money for the monetary bid, stronger manufacturing for the industrial bid. If the next chair leans into supporting the energy transition or domestic infrastructure, silver's supply-demand story gets even tighter.</p>
-
-                <h3>Crypto's Sensitivity to the Fed</h3>
-                <p>Bitcoin was born as a response to central bank excess, but it trades like a risk asset. Correlation with the Nasdaq sits around 0.6 over the past three years. When the Fed tightens, crypto sells off. When liquidity expands, it rips. The chair's stance on quantitative tightening, balance sheet runoff, and bank reserve requirements matters as much for Bitcoin as it does for equities.</p>
-                <p>There's also the regulatory dimension. A chair who views digital assets as systemic risks will push for stricter bank capital rules around crypto exposure. One who sees them as innovation will leave more room for institutional adoption. The tone from the top of the Fed filters directly into how aggressively the OCC, FDIC, and SEC coordinate on crypto policy.</p>
-
-                <h3>What to Watch</h3>
-                <p>The next appointment cycle will likely hinge on a few questions. Does the incoming chair view the neutral rate as structurally higher than pre-pandemic levels? Are they willing to tolerate above-target inflation for the sake of employment? How do they think about financial stability in the context of a $1.7 trillion private credit market and $3 trillion in crypto market cap?</p>
-                <p>For investors in metals and digital assets, the answers to these questions aren't academic. They're the difference between a multi-year bull run and a prolonged grind. Pay attention to the confirmation hearings. The real alpha is in the policy signals before the first rate decision.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="article-modal" id="article-ai-finance">
-        <div class="article-modal-inner">
-            <button class="article-modal-close" onclick="closeArticle()">&times;</button>
-            <span class="blog-tag">Fintech</span>
-            <h2>How AI Is Transforming Financial Analysis</h2>
-            <span class="article-date">January 2026</span>
-            <div class="article-body">
-                <p>Walk into any trading floor or asset management office today and you'll find the same thing: analysts using AI tools that didn't exist two years ago. The shift isn't coming. It's here, and it's already changing who gets hired, what skills matter, and how investment decisions get made.</p>
-
-                <h3>From Spreadsheets to Language Models</h3>
-                <p>For decades, financial analysis meant building Excel models, reading 10-Ks, and making educated guesses about forward earnings. The process was manual, slow, and heavily dependent on an analyst's ability to synthesize information from dozens of sources. A good analyst could cover maybe 20 stocks deeply. AI doesn't replace that judgment, but it compresses the grunt work dramatically.</p>
-                <p>Large language models can now parse an entire earnings transcript in seconds, flag deviations from prior guidance, cross-reference management commentary against supply chain data, and surface sentiment shifts that a human reader might miss on the third read-through. The analyst's role is shifting from information gatherer to decision maker.</p>
-
-                <h3>Equity Research Gets Faster</h3>
-                <p>Sell-side research has historically operated on a publish-or-perish model. Speed to a note after earnings mattered almost as much as the quality of the analysis. AI is collapsing that timeline. Some shops are using generative models to draft first-pass research notes within minutes of an earnings release, which analysts then refine and add conviction to.</p>
-                <p>The implication is significant. If every desk has access to the same AI-generated baseline, the edge shifts from speed of information processing to quality of insight. The analysts who thrive will be the ones who can ask better questions, not the ones who can read faster.</p>
-
-                <h3>Risk Management and Portfolio Construction</h3>
-                <p>On the buy side, AI is reshaping how portfolios get built. Traditional mean-variance optimization relied on historical correlations that broke down exactly when you needed them most. Newer approaches use machine learning to model regime shifts, tail risks, and non-linear factor exposures that classical models couldn't capture.</p>
-                <p>Credit analysis is another area seeing rapid adoption. Parsing loan covenants across a portfolio of hundreds of private credit deals used to require an army of associates. NLP models can now flag covenant breaches, extract key terms, and compare deal structures across vintages at a fraction of the time and cost.</p>
-
-                <h3>What This Means for Students Entering Finance</h3>
-                <p>The skillset for entry-level finance roles is evolving fast. Knowing how to build a DCF is table stakes. What's increasingly valuable is the ability to work with AI tools: knowing how to prompt a model effectively, how to validate its outputs against first principles, and how to integrate AI-generated analysis into a coherent investment thesis.</p>
-                <p>Python fluency is becoming as important as accounting fluency. Not because every analyst needs to build models from scratch, but because understanding what's happening under the hood is the difference between using AI as a tool and being replaced by it. The best junior analysts I've seen treat AI as a research partner, not an oracle.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="article-modal" id="article-private-credit">
-        <div class="article-modal-inner">
-            <button class="article-modal-close" onclick="closeArticle()">&times;</button>
-            <span class="blog-tag">Credit</span>
-            <h2>Will Private Credit Go Public?</h2>
-            <span class="article-date">December 2025</span>
-            <div class="article-body">
-                <p>Private credit has been the quiet giant of post-GFC finance. While public markets grabbed headlines, an entire parallel lending system grew from under $500 billion in 2015 to over $1.7 trillion today. Now the question isn't whether it will keep growing, but whether it can stay private.</p>
-
-                <h3>How We Got Here</h3>
-                <p>After 2008, banks pulled back from lending to mid-market companies. Regulatory capital requirements under Basel III and Dodd-Frank made it expensive for traditional lenders to hold risky credit on their balance sheets. Private credit funds filled the gap, offering direct loans to companies that couldn't easily access public bond markets or syndicated loans.</p>
-                <p>The pitch to investors was compelling: higher yields than investment-grade bonds, lower volatility than public high-yield (partly because these assets don't mark to market daily), and genuine diversification away from public equity risk. Pension funds, endowments, and sovereign wealth funds piled in.</p>
-
-                <h3>The Retailification Problem</h3>
-                <p>The issue now is that institutional demand has been so strong that returns are compressing. Spreads on direct lending deals have tightened from 600+ basis points over SOFR to sometimes under 500. Fund managers need new capital sources to maintain AUM growth, and the obvious answer is retail.</p>
-                <p>We're already seeing it. Interval funds, BDCs, and semi-liquid structures are packaging private credit for high-net-worth and even mass-affluent investors. Apollo, Blackstone, and Ares have all launched or expanded retail-accessible credit vehicles. The question is whether these structures can handle the fundamental mismatch between illiquid assets and investors who expect some degree of liquidity.</p>
-
-                <h3>Regulatory Pressure</h3>
-                <p>Regulators are paying attention. The SEC has flagged concerns about valuation practices in private credit, specifically the risk that managers are slow to mark down troubled loans. The Basel Committee has raised questions about bank exposure to private credit through fund finance facilities. And the Financial Stability Board has started including private credit in its systemic risk monitoring.</p>
-                <p>None of this means a crackdown is imminent, but the regulatory direction is clear: more transparency, more standardized reporting, and eventually more oversight. Each step toward transparency makes private credit look a little more like public credit. That's the paradox.</p>
-
-                <h3>Can It Stay Private?</h3>
-                <p>The bull case for private credit has always rested on two pillars: the illiquidity premium and information asymmetry. Lenders who can do deep diligence on a middle-market company and hold the loan to maturity should earn a premium over public market investors who can't or won't.</p>
-                <p>But as the market grows, those edges erode. More competition means tighter spreads. More retail money means more liquidity provisions. More regulatory scrutiny means more disclosure. At some point, private credit starts to look a lot like a slower, more expensive version of public high-yield with a different label.</p>
-                <p>My view is that the best managers will continue to earn their fees through genuine sourcing and underwriting skill. But the asset class as a whole is on a trajectory toward convergence with public markets. The label might stay private. The reality will be increasingly public.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="article-modal" id="article-saas">
-        <div class="article-modal-inner">
-            <button class="article-modal-close" onclick="closeArticle()">&times;</button>
-            <span class="blog-tag">Tech</span>
-            <h2>Why SaaS Isn't Dead Yet</h2>
-            <span class="article-date">November 2025</span>
-            <div class="article-body">
-                <p>If you've scrolled through finance Twitter or sat through a VC panel recently, you've heard the take: SaaS is dead. AI is going to unbundle every software tool into a prompt. Seat-based pricing is over. The recurring revenue model that built a generation of tech companies is supposedly finished. I think that's wrong, and here's why.</p>
-
-                <h3>The Revenue Model Still Works</h3>
-                <p>SaaS companies trade at premium multiples for a reason. Recurring revenue is predictable. Net revenue retention above 120% means your existing customers are spending more every year without you acquiring a single new one. Gross margins north of 75% mean every incremental dollar of revenue falls almost entirely to the bottom line after you've built the product.</p>
-                <p>Compare that to the unit economics of most AI-native companies right now. Inference costs are real. GPU compute is expensive. And most AI products are still struggling with the same customer acquisition challenges that SaaS companies solved years ago. The models might be new, but the go-to-market playbook is the same.</p>
-
-                <h3>Switching Costs Are Real</h3>
-                <p>The strongest argument for SaaS durability is the one nobody talks about because it's boring: switching costs. An enterprise running its CRM on Salesforce, its ERP on NetSuite, and its comms on Slack isn't going to rip that out because an AI chatbot can draft emails. These tools are embedded in workflows, training programs, compliance frameworks, and integration architectures that took years to build.</p>
-                <p>The switching cost isn't just financial. It's organizational. Every migration is a project with risk, downtime, and retraining. CTOs know this, which is why churn rates at the best enterprise SaaS companies sit below 5% annually. That's not a model that's dying.</p>
-
-                <h3>AI Makes SaaS Better, Not Obsolete</h3>
-                <p>The smarter way to think about AI and SaaS isn't replacement. It's enhancement. The SaaS companies that are thriving right now are the ones embedding AI into their existing products. Notion added AI summarization. HubSpot added AI-generated email sequences. Even Salesforce rolled out Einstein GPT. In each case, AI became a feature that increased willingness to pay, not a competitor that made the product irrelevant.</p>
-                <p>The companies most at risk aren't SaaS businesses broadly. They're the thin-wrapper tools that did one simple thing and charged a monthly fee for it. PDF converters, basic scheduling tools, simple form builders. Those are getting commoditized by AI. But the platforms with deep data moats, complex workflows, and enterprise-grade compliance? They're using AI to widen the gap.</p>
-
-                <h3>Valuation Resets Aren't Death</h3>
-                <p>Part of the "SaaS is dead" narrative comes from the valuation correction of 2022-2023. Revenue multiples compressed from 20x+ to 6-8x for many public SaaS names. That was painful for investors who bought at the top. But it wasn't a structural failure of the business model. It was a return to rational pricing after a period of excess.</p>
-                <p>At current valuations, many SaaS companies are actually attractive. They generate real free cash flow, have durable competitive positions, and are growing 15-25% annually. If anything, the reset made the sector healthier by flushing out the companies that were burning cash to juice growth metrics without building real products.</p>
-                <p>SaaS isn't dead. It's just not overhyped anymore. And for investors who care about fundamentals over narratives, that's exactly when you want to be paying attention.</p>
-            </div>
-        </div>
-    </div>
 
     <!-- Certification PDF Modal -->
     <div class="cert-modal" id="certModal">
@@ -2362,31 +1990,9 @@
 
     statElements.forEach(el => statObserver.observe(el));
 
-    // === Article modals ===
-    function openArticle(id) {
-        const modal = document.getElementById('article-' + id);
-        if (modal) {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-    }
-
-    function closeArticle() {
-        document.querySelectorAll('.article-modal').forEach(m => m.classList.remove('active'));
-        document.body.style.overflow = '';
-    }
-
-    // Close on backdrop click
-    document.querySelectorAll('.article-modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeArticle();
-        });
-    });
-
-    // Close on Escape key (articles + certs)
+    // Close on Escape key (certs)
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            closeArticle();
             closeCert();
         }
     });
